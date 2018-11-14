@@ -13,9 +13,9 @@ public class Affichage extends JFrame implements ActionListener {
     public Affichage(){
         super();
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setSize(750,600);
+        setSize(700,750);
         setLocationRelativeTo(null);
-        plateau = new Plateau(10);
+        plateau = new Plateau(45);
         add(plateau, BorderLayout.CENTER);
         monTimer = new Timer(10,this);
 
@@ -23,6 +23,7 @@ public class Affichage extends JFrame implements ActionListener {
         barreMenus.add(boutonAction);
         setJMenuBar(barreMenus);
         setVisible(true);
+        plateau.afficherPlateau();
         //monTimer.start();
     }
 
