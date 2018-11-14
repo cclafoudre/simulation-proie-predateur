@@ -37,8 +37,17 @@ public class Graph extends JPanel {
         new Thread(()->{
         if(index<longeur-1){
             serieDonnee[index] = valeur;
-            index++;
-            tracer();
+            try {
+                tracerPoint(index);
+                effacerPoint(index+1);
+                effacerPoint(index+2);
+                effacerPoint(index+3);
+                effacerPoint(index+4);
+                effacerPoint(index+5);
+                index++;
+            } catch (ArrayIndexOutOfBoundsException e) {
+                System.out.println("f(" + index + ")=" + serieDonnee[index]);
+            }
         }
         else {
             decaler(1);
@@ -46,35 +55,42 @@ public class Graph extends JPanel {
         }
         }).start();
     }
-
-    public void decaler(int n){
-        int[] nouveau = new int[longeur];
-        for (int i = nouveau.length-1; i >n; i-=1) {
-            nouveau[i-n]=serieDonnee[i];
-        }
-        index=longeur-1-n;
-        serieDonnee = nouveau;
-        nouveau = null;
-        /*for (int i = 0; i < longeur; i++) {
-            for(int y=0;y<image.getHeight()-1;y++){
-                image.setRGB(i*zoomX,y,Color.BLACK.getRGB());
-            }
-        }*/
+    private void tracerPoint(int index) {
+        image.setRGB(index * zoomX, image.getHeight()-1 - serieDonnee[index], new Color(26, 255, 47).getRGB());
+    }
+    private void effacerPoint(int x) {try {
+        image.setRGB(x * zoomX, image.getHeight() - 1 - serieDonnee[x], new Color(0, 0, 0).getRGB());
+    }catch (ArrayIndexOutOfBoundsException e){}
     }
 
-    public void tracer(){
-        for (int i = 0; i < serieDonnee.length; i++) {
-            if(serieDonnee[i]==0)
-                continue;
-            for(int y=0;y<image.getHeight()-1;y++){
-                image.setRGB(i*zoomX,y,Color.BLACK.getRGB()); // on efface l'ordonnée précédente
-            }
-            try{image.setRGB(i*zoomX,image.getHeight()-serieDonnee[i], new Color(26, 255, 47).getRGB());}
-            catch (ArrayIndexOutOfBoundsException e) {
-                System.out.println("f(" + i + ")=" + serieDonnee[i]);
-            }
+    public void clean() {
+        image = new BufferedImage(longeur*zoomX, 700,BufferedImage.TYPE_INT_RGB);
+        index=0;
+    }
+
+    public void decaler(int n) {
+        /*int[] nouveau = new int[longeur];
+        for (int i = nouveau.length - 1; i > n; i -= 1) {
+            nouveau[i - n] = serieDonnee[i];
         }
-        //repaint();
+        index = longeur - 1 - n;
+        serieDonnee = nouveau;
+        nouveau = null;*/
+        index=0; //en fait tracer juste avant le précédent ça va ...
+    }
+
+    public void tracer() {
+        // for (int i = 0; i < serieDonnee.length; i++) {
+        //    /* if(serieDonnee[i]==0)
+        //         continue;
+        //     for(int y=0;y<image.getHeight()-1;y++){
+        //        image.setRGB(i*zoomX,y,Color.BLACK.getRGB()); // on efface l'ordonnée précédente
+        //     }*/
+        //     try{image.setRGB(i*zoomX,image.getHeight()-serieDonnee[i], new Color(26, 255, 47).getRGB());}
+        //     catch (ArrayIndexOutOfBoundsException e) {
+        //         System.out.println("f(" + i + ")=" + serieDonnee[i]);
+        //     }
+        // }
     }
 
     public void paintComponent(Graphics g) {

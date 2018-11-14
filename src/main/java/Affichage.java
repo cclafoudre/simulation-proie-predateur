@@ -24,6 +24,7 @@ public class Affichage extends JFrame implements ActionListener {
     private JSlider tailleCase = new JSlider(4,70,10);
     private JMenuItem vitesseAnim = new JMenuItem("Délai de simulation");
     private JSlider slideVitesse = new JSlider(10,100,50);
+    private JMenuItem cleanGraph = new JMenuItem("Remise à zéro du graphique");
 
     public Affichage(){
         super();
@@ -41,6 +42,7 @@ public class Affichage extends JFrame implements ActionListener {
         vitesseAnim.addActionListener(this);
         plusDeVivants.addActionListener(this);
         moinsDeVivants.addActionListener(this);
+        cleanGraph.addActionListener(this);
 
         tailleCase.setToolTipText("Taille des cases");
         tailleCase.addChangeListener(new ChangeListener() {
@@ -59,6 +61,8 @@ public class Affichage extends JFrame implements ActionListener {
         parametres.add(new JSeparator());
         parametres.add(vitesseAnim);
         parametres.add(slideVitesse);
+        parametres.add(new JSeparator());
+        parametres.add(cleanGraph);
         barreMenus.add(parametres);
 
         actions.add(boutonAction);
@@ -106,6 +110,9 @@ public class Affichage extends JFrame implements ActionListener {
             //}).start();
             //effectuer un tour
         }
+        if(e.getSource().equals(cleanGraph)){graphique.clean();}
+
+
         if(e.getSource().equals(boutonStart)){monTimer.start();}
         if(e.getSource().equals(boutonStop)){monTimer.stop();}
 
