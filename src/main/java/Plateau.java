@@ -1,7 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.VolatileImage;
 
 public class Plateau extends JPanel {
     protected BufferedImage image;
@@ -116,7 +115,7 @@ public class Plateau extends JPanel {
         ajouterVivant(ilVaBouger, newPos);
     }
 
-    public void genererAlea(int nbrePotiron, int nbreLapins) {
+    public void genererAlea(int nbrePotiron, int nbreLapins, Graph graph) {
         final int[] nP = {0};
         final int[] nL = {0};
         Thread safe = new Thread(()->{
@@ -134,6 +133,7 @@ public class Plateau extends JPanel {
             Pos pos = Pos.getRandomPos(taille);
             if(Pos.getTab(simulation, pos)==null) {
                 ajouterVivant(new Potiron(), pos);
+                graph.addData(getNbreVivants());
                 nP[0] +=1;
             }
         }
@@ -141,13 +141,14 @@ public class Plateau extends JPanel {
             Pos pos = Pos.getRandomPos(taille);
             if(Pos.getTab(simulation, pos)==null) {
                 ajouterVivant(new Lapin(), pos);
+                graph.addData(getNbreVivants());
                 nL[0] += 1;
             }
         }
         safe.stop();
         //System.out.println("Génération de vivants terminée");
     }
-    public void supprAlea(int nombre) {
+    public void supprAlea(int nombre, Graph graph) {
         final int[] n = {0};
         new Thread(()->{
             try {
@@ -162,8 +163,20 @@ public class Plateau extends JPanel {
             Pos pos = Pos.getRandomPos(taille);
             if(Pos.getTab(simulation, pos)!=null) {
                 enleverVivant(pos);
+                graph.addData(getNbreVivants());
                 n[0]+=1;
             }
         }
+    }
+
+    public int getNbreVivants(){
+        int n=0;
+        for (int y = 0; y < simulation.length; y++) {
+            for (int x = 0; x < simulation[y].length; x++) {
+                if(simulation[y][x]!=null)
+                    n++;
+            }
+        }
+        return n;
     }
 }

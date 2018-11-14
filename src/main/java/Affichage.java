@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 public class Affichage extends JFrame implements ActionListener {
     public Timer monTimer;
     private Plateau plateau;
+    private Graph graphique;
 
     private JPanel zoneAffichage = new JPanel(new BorderLayout());
     private JMenuBar barreMenus = new JMenuBar();
@@ -68,8 +69,6 @@ public class Affichage extends JFrame implements ActionListener {
         actions.add(moinsDeVivants);
         barreMenus.add(actions);
         setJMenuBar(barreMenus);
-        JPanel zoneGraph = new JPanel();
-        add(zoneGraph, BorderLayout.SOUTH);
 
         add(zoneAffichage, BorderLayout.CENTER);
         setVisible(true);
@@ -81,8 +80,9 @@ public class Affichage extends JFrame implements ActionListener {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            plateau.genererAlea(120,50);
+            plateau.genererAlea(120,50, graphique);
         }).start();
+        graphique = Graph.lancer();
     }
 
     public static void main(String[] args) {
@@ -102,14 +102,15 @@ public class Affichage extends JFrame implements ActionListener {
             //System.out.println("On effectue un tour de simulation");
             //new Thread(()->{
             plateau.simuler();
+            graphique.addData(plateau.getNbreVivants());
             //}).start();
             //effectuer un tour
         }
         if(e.getSource().equals(boutonStart)){monTimer.start();}
         if(e.getSource().equals(boutonStop)){monTimer.stop();}
 
-        if(e.getSource().equals(plusDeVivants)){plateau.genererAlea(100,100);}
-        if(e.getSource().equals(moinsDeVivants)){plateau.supprAlea(100);}
+        if(e.getSource().equals(plusDeVivants)){plateau.genererAlea(100,100, graphique);}
+        if(e.getSource().equals(moinsDeVivants)){plateau.supprAlea(100, graphique);}
 
         if(e.getSource().equals(vitesseAnim)){
             System.out.println("Choix de vitesse");
