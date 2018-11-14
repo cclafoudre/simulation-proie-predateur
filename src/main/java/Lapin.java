@@ -9,7 +9,6 @@ public class Lapin extends Vivant{
 
     public Lapin(){
         super(5);
-        setBackground(COULEUR);
     }
     public void manger() {
         pointsDeNutrition+=1;
@@ -18,7 +17,7 @@ public class Lapin extends Vivant{
     public void jourSansManger(){
         pointsDeNutrition-=1;
     }
-    public static Color getCouleur() {
+    public Color getCouleur() {
         return COULEUR;
     }
 }
