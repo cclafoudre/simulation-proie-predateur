@@ -1,6 +1,13 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Date;
 
 public class Plateau extends JPanel {
     protected BufferedImage image;
@@ -8,15 +15,24 @@ public class Plateau extends JPanel {
     public static int tailleCase = 15;
     protected int taille;
 
+    protected int iterations=0;
+    public Path dossier;
+
     public Plateau(int taille) {
         super();
         this.taille = taille;
         genererPlateau(taille);
         image = new BufferedImage((taille+1)*tailleCase,(taille+1)*tailleCase,BufferedImage.TYPE_INT_RGB);
+        try {
+            dossier = Files.createDirectories(Paths.get("simul-"+new Date().toString()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void simuler(){
         mouvementTest();
+        iterations+=1;
         afficherPlateau();
     }
 
@@ -59,6 +75,13 @@ public class Plateau extends JPanel {
             }
         }
         repaint();
+
+        try {
+            String chemin = dossier.toString()+File.separator+iterations+".png";
+            ImageIO.write(image, "png", new File(chemin));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     private void afficherCase(Vivant vivant, int x, int y) {
         for (int j = -tailleCase/2+1; j < tailleCase/2-1; j++) {

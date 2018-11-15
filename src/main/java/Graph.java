@@ -115,7 +115,7 @@ public class Graph extends JPanel {
         window.setSize(900,750);
         window.setLocationRelativeTo(null);
         window.setVisible(true);
-        window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        //window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         return g;
     }
 
