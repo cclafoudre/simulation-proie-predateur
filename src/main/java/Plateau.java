@@ -2,8 +2,10 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,42 +17,40 @@ public class Plateau extends JPanel {
     public static int tailleCase = 15;
     protected int taille;
 
-    protected int iterations=0;
+    protected int iterations = 0;
     public Path dossier;
+    protected boolean capturerSimul = false;
 
     public Plateau(int taille) {
         super();
         this.taille = taille;
         genererPlateau(taille);
-        image = new BufferedImage((taille+1)*tailleCase,(taille+1)*tailleCase,BufferedImage.TYPE_INT_RGB);
-        try {
-            dossier = Files.createDirectories(Paths.get("simul-"+new Date().toString()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        image = new BufferedImage((taille + 1) * tailleCase, (taille + 1) * tailleCase, BufferedImage.TYPE_INT_RGB);
     }
 
-    public void simuler(){
+    public void simuler() {
         mouvementTest();
-        iterations+=1;
         afficherPlateau();
     }
 
-    public void ajouterVivant(Vivant nouveau, Pos pos){
+    public void ajouterVivant(Vivant nouveau, Pos pos) {
         Pos.setTab(simulation, pos, nouveau);
         nouveau.setPos(pos);
     }
-    public Vivant enleverVivant(Vivant aSuppr){
+
+    public Vivant enleverVivant(Vivant aSuppr) {
         Pos.delTab(simulation, aSuppr.getPos());
         return aSuppr;
     }
-    public Vivant enleverVivant(Pos pos){
+
+    public Vivant enleverVivant(Pos pos) {
         Vivant suppr = selectVivant(pos);
         Pos.delTab(simulation, pos);
         return suppr;
     }
-    public Vivant selectVivant(Pos pos){
-        return  (Vivant) Pos.getTab(simulation, pos);
+
+    public Vivant selectVivant(Pos pos) {
+        return (Vivant) Pos.getTab(simulation, pos);
     }
 
     public void genererPlateau(int taille) {
@@ -59,47 +59,50 @@ public class Plateau extends JPanel {
         simulation[2][0] = new Potiron();
         simulation[2][1] = new Lapin();
         simulation[5][5] = new Lapin();
-        simulation[taille-2][taille-2] = new Potiron();
-        simulation[taille-5][taille-2] = new Potiron();
-        simulation[taille-2][taille-5] = new Potiron();
-        simulation[taille-1][taille-1] = new Potiron();
-        simulation[taille-1][taille-2] = new Lapin();
-        simulation[taille-2][taille-1] = new Lapin();
+        simulation[taille - 2][taille - 2] = new Potiron();
+        simulation[taille - 5][taille - 2] = new Potiron();
+        simulation[taille - 2][taille - 5] = new Potiron();
+        simulation[taille - 1][taille - 1] = new Potiron();
+        simulation[taille - 1][taille - 2] = new Lapin();
+        simulation[taille - 2][taille - 1] = new Lapin();
     }
 
-    public void afficherPlateau(){
-        for(int y=0;y<taille+1; y++) {
-            for(int x=0; x<taille+1; x++) {
-                if(x<taille && y<taille)
-                    afficherCase(simulation[y][x], tailleCase*(x+1), tailleCase*(y+1));
+    public void afficherPlateau() {
+        for (int y = 0; y < taille + 1; y++) {
+            for (int x = 0; x < taille + 1; x++) {
+                if (x < taille && y < taille)
+                    afficherCase(simulation[y][x], tailleCase * (x + 1), tailleCase * (y + 1));
             }
         }
         repaint();
-
+        if (!capturerSimul) //si on ne demande pas de capturer, les images, le code s'arrête ici
+            return;
+        iterations += 1;
         try {
-            String chemin = dossier.toString()+File.separator+iterations+".png";
+            String chemin = dossier.toString() + File.separator + String.format("%09d", iterations) + ".png"; //sauvegarde les fichiers avec 9 zéros
             ImageIO.write(image, "png", new File(chemin));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
     private void afficherCase(Vivant vivant, int x, int y) {
-        for (int j = -tailleCase/2+1; j < tailleCase/2-1; j++) {
-            for (int i = -tailleCase/2+1; i < tailleCase/2-1; i++) {
-                    int X=x + i;
-                    int Y=y+j;
+        for (int j = -tailleCase / 2 + 1; j < tailleCase / 2 - 1; j++) {
+            for (int i = -tailleCase / 2 + 1; i < tailleCase / 2 - 1; i++) {
+                int X = x + i;
+                int Y = y + j;
                 try {
-                    if(vivant != null && vivant.visible())
-                        image.setRGB(X,Y, vivant.getCouleur().getRGB());
+                    if (vivant != null && vivant.visible())
+                        image.setRGB(X, Y, vivant.getCouleur().getRGB());
                     else
-                        image.setRGB(X,Y, Vivant.COULEUR.getRGB());
-                }catch (ArrayIndexOutOfBoundsException e){
-                    System.out.println("x="+x+" y="+y);
-                    System.out.println("x+i="+x+i+" y+j="+y+j);
+                        image.setRGB(X, Y, Vivant.COULEUR.getRGB());
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    System.out.println("x=" + x + " y=" + y);
+                    System.out.println("x+i=" + x + i + " y+j=" + y + j);
                     e.printStackTrace();
-                } catch (NullPointerException e){ //il n'y a rien dans cette case
+                } catch (NullPointerException e) { //il n'y a rien dans cette case
                     System.out.println("Il n'y a rien dans cette case !");
-                    image.setRGB(X,Y, Vivant.COULEUR.getRGB());
+                    image.setRGB(X, Y, Vivant.COULEUR.getRGB());
                 }
             }
         }
@@ -107,23 +110,23 @@ public class Plateau extends JPanel {
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if(image != null)
-        {
+        if (image != null) {
             g.drawImage(image,
-                    (getWidth()-image.getWidth())/2,
-                    (getHeight()-image.getHeight())/2,
+                    (getWidth() - image.getWidth()) / 2,
+                    (getHeight() - image.getHeight()) / 2,
                     null);
         }
     }
+
     public void zoom(int facteur) {
         tailleCase = facteur;
-        image = new BufferedImage((taille+1)*tailleCase,(taille+1)*tailleCase,BufferedImage.TYPE_INT_RGB);
+        image = new BufferedImage((taille + 1) * tailleCase, (taille + 1) * tailleCase, BufferedImage.TYPE_INT_RGB);
         afficherPlateau();
     }
 
     private void mouvementTest() { //fait un mouvement aléatoire
         Pos pos = Pos.getRandomPos(taille);
-        while(Pos.getTab(simulation, pos)==null) { //on ne choisit pas une case vide
+        while (Pos.getTab(simulation, pos) == null) { //on ne choisit pas une case vide
             pos = Pos.getRandomPos(taille);
         }
         Vivant ilVaBouger = (Vivant) Pos.getTab(simulation, pos);
@@ -131,7 +134,7 @@ public class Plateau extends JPanel {
         enleverVivant(pos);
 
         Pos newPos = Pos.getRandomPos(taille);
-        while(Pos.getTab(simulation, newPos)!=null) { //on ne choisit pas une case vide
+        while (Pos.getTab(simulation, newPos) != null) { //on ne choisit pas une case vide
             newPos = Pos.getRandomPos(taille);
         }
         //Pos.setTab(simulation, newPos, ilVaBouger);
@@ -141,28 +144,28 @@ public class Plateau extends JPanel {
     public void genererAlea(int nbrePotiron, int nbreLapins, Graph graph) {
         final int[] nP = {0};
         final int[] nL = {0};
-        Thread safe = new Thread(()->{
+        Thread safe = new Thread(() -> {
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            nP[0] =nbrePotiron;
-            nL[0] =nbreLapins;
+            nP[0] = nbrePotiron;
+            nL[0] = nbreLapins;
             System.out.println("Génération arrêtée");
         });
         safe.start();
-        while (nP[0] <nbrePotiron){
+        while (nP[0] < nbrePotiron) {
             Pos pos = Pos.getRandomPos(taille);
-            if(Pos.getTab(simulation, pos)==null) {
+            if (Pos.getTab(simulation, pos) == null) {
                 ajouterVivant(new Potiron(), pos);
                 graph.addData(getNbreVivants());
-                nP[0] +=1;
+                nP[0] += 1;
             }
         }
-        while (nL[0] <nbreLapins){
+        while (nL[0] < nbreLapins) {
             Pos pos = Pos.getRandomPos(taille);
-            if(Pos.getTab(simulation, pos)==null) {
+            if (Pos.getTab(simulation, pos) == null) {
                 ajouterVivant(new Lapin(), pos);
                 graph.addData(getNbreVivants());
                 nL[0] += 1;
@@ -171,35 +174,62 @@ public class Plateau extends JPanel {
         safe.stop();
         //System.out.println("Génération de vivants terminée");
     }
+
     public void supprAlea(int nombre, Graph graph) {
         final int[] n = {0};
-        new Thread(()->{
+        new Thread(() -> {
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            n[0] =0;
+            n[0] = 0;
             System.out.println("Génération arrêtée");
         }).start();
-        while(n[0] <nombre) {
+        while (n[0] < nombre) {
             Pos pos = Pos.getRandomPos(taille);
-            if(Pos.getTab(simulation, pos)!=null) {
+            if (Pos.getTab(simulation, pos) != null) {
                 enleverVivant(pos);
                 graph.addData(getNbreVivants());
-                n[0]+=1;
+                n[0] += 1;
             }
         }
     }
 
-    public int getNbreVivants(){
-        int n=0;
+    public int getNbreVivants() {
+        int n = 0;
         for (int y = 0; y < simulation.length; y++) {
             for (int x = 0; x < simulation[y].length; x++) {
-                if(simulation[y][x]!=null)
+                if (simulation[y][x] != null)
                     n++;
             }
         }
         return n;
+    }
+
+    public void startCapture() {
+        capturerSimul = true;
+        if (iterations == 0) { //si on reprend la capture, pas besoin de recréer le dossier
+            try {
+                dossier = Files.createDirectories(Paths.get("simul-" + new Date().toString()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void stopCapture() {
+        capturerSimul = false;
+    }
+
+    public void toggleCapture() {
+        if (capturerSimul)
+            stopCapture();
+        else
+            startCapture();
+    }
+
+    public void lancerFfmpeg() {
+        System.out.println("ffmpeg -r 60 -f image2 -s 500x500 -i \"" + dossier.toString() + "\"/%09d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p \"" + dossier.toString() + "\".mp4");
     }
 }

@@ -18,6 +18,7 @@ public class Affichage extends JFrame implements ActionListener {
     private JMenuItem boutonStop = new JMenuItem("Arrêter la simulation");
     private JMenuItem plusDeVivants = new JMenuItem("Ajouter des vivants");
     private JMenuItem moinsDeVivants = new JMenuItem("Supprimer des vivants");
+    private JMenuItem genVid = new JMenuItem("Générer la vidéo (ffmpeg requis)");
 
     private JMenu parametres = new JMenu("Paramètres");
     private JMenuItem infoZoom = new JMenuItem("Zoom");
@@ -25,6 +26,7 @@ public class Affichage extends JFrame implements ActionListener {
     private JMenuItem vitesseAnim = new JMenuItem("Délai de simulation");
     private JSlider slideVitesse = new JSlider(10,100,50);
     private JMenuItem cleanGraph = new JMenuItem("Remise à zéro du graphique");
+    private JCheckBoxMenuItem capturePix = new JCheckBoxMenuItem("Enregistrer la simulation");
 
     public Affichage(){
         super();
@@ -43,6 +45,8 @@ public class Affichage extends JFrame implements ActionListener {
         plusDeVivants.addActionListener(this);
         moinsDeVivants.addActionListener(this);
         cleanGraph.addActionListener(this);
+        capturePix.addActionListener(this);
+        genVid.addActionListener(this);
 
         tailleCase.setToolTipText("Taille des cases");
         tailleCase.addChangeListener(new ChangeListener() {
@@ -58,6 +62,7 @@ public class Affichage extends JFrame implements ActionListener {
         infoZoom.setEnabled(false);
         parametres.add(infoZoom);
         parametres.add(tailleCase);
+        parametres.add(capturePix);
         parametres.add(new JSeparator());
         parametres.add(vitesseAnim);
         parametres.add(slideVitesse);
@@ -71,6 +76,8 @@ public class Affichage extends JFrame implements ActionListener {
         actions.add(new JSeparator());
         actions.add(plusDeVivants);
         actions.add(moinsDeVivants);
+        actions.add(new JSeparator());
+        actions.add(genVid);
         barreMenus.add(actions);
         setJMenuBar(barreMenus);
 
@@ -92,7 +99,7 @@ public class Affichage extends JFrame implements ActionListener {
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        //    UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
         } catch (ClassNotFoundException e) {
         } catch (InstantiationException e) {
         } catch (IllegalAccessException e) {
@@ -118,6 +125,9 @@ public class Affichage extends JFrame implements ActionListener {
 
         if(e.getSource().equals(plusDeVivants)){plateau.genererAlea(100,100, graphique);}
         if(e.getSource().equals(moinsDeVivants)){plateau.supprAlea(100, graphique);}
+
+        if(e.getSource().equals(capturePix)){plateau.toggleCapture();}
+        if(e.getSource().equals(genVid)){plateau.lancerFfmpeg();}
 
         if(e.getSource().equals(vitesseAnim)){
             System.out.println("Choix de vitesse");
