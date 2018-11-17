@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="modele-proie-predateur:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/modele_proie_predateur_jar</output-path>
+    <root id="archive" name="modele-proie-predateur.jar">
+      <element id="module-output" name="modele-proie-predateur" />
+    </root>
+  </artifact>
+</component>
