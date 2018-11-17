@@ -25,17 +25,31 @@ public class Plateau extends JPanel implements ActionListener {
     private Timer perfTimer = new Timer(1000, this);
     private int perCompteur = 0;
 
+    public Timer fps;
+
     public Plateau(int taille) {
         super();
         this.taille = taille;
         genererPlateau(taille);
         perfTimer.start();
         image = new BufferedImage((taille + 1) * tailleCase, (taille + 1) * tailleCase, BufferedImage.TYPE_INT_RGB);
+        fps = new Timer(16, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                afficherPlateau();
+            }
+        });
+        fps.start();
     }
 
     public void simuler() {
         mouvementTest();
-        afficherPlateau();
+
+        /*new Thread(this::mouvementTest).start();
+        new Thread(this::mouvementTest).start();
+        new Thread(()->{
+            mouvementTest();
+        }).start();*/
     }
 
     public void ajouterVivant(Vivant nouveau, Pos pos) {
@@ -124,9 +138,10 @@ public class Plateau extends JPanel implements ActionListener {
     }
 
     public void zoom(int facteur) {
+        fps.stop();
         tailleCase = facteur;
         image = new BufferedImage((taille + 1) * tailleCase, (taille + 1) * tailleCase, BufferedImage.TYPE_INT_RGB);
-        afficherPlateau();
+        fps.start();
     }
 
     private void mouvementTest() { //fait un mouvement aléatoire

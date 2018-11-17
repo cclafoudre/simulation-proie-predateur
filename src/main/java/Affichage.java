@@ -24,9 +24,12 @@ public class Affichage extends JFrame implements ActionListener {
     private JMenuItem infoZoom = new JMenuItem("Zoom");
     private JSlider tailleCase = new JSlider(4,70,10);
     private JMenuItem vitesseAnim = new JMenuItem("Délai de simulation");
-    private JSlider slideVitesse = new JSlider(10,100,50);
+    private JSlider slideVitesse = new JSlider(1,100,50);
     private JMenuItem cleanGraph = new JMenuItem("Remise à zéro du graphique");
     private JCheckBoxMenuItem capturePix = new JCheckBoxMenuItem("Enregistrer la simulation");
+
+    private JMenuItem textFPS = new JMenuItem("Vitesse d'affichage: T(s)");
+    private JSlider slideFPS = new JSlider(1,60,30);
 
     public Affichage(){
         super();
@@ -60,9 +63,22 @@ public class Affichage extends JFrame implements ActionListener {
             }
         });
         infoZoom.setEnabled(false);
+        textFPS.setEnabled(false);
+        slideFPS.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                float fps= (float) slideFPS.getValue();
+                float hz = 1/fps;
+                plateau.fps.setDelay((int) (1000*hz));
+                textFPS.setText("Vitesse d'affichage (T="+hz+" s");
+            }
+        });
         parametres.add(infoZoom);
         parametres.add(tailleCase);
         parametres.add(capturePix);
+        parametres.add(new JSeparator());
+        parametres.add(textFPS);
+        parametres.add(slideFPS);
         parametres.add(new JSeparator());
         parametres.add(vitesseAnim);
         parametres.add(slideVitesse);
