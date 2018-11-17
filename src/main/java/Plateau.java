@@ -1,6 +1,8 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,7 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 
-public class Plateau extends JPanel {
+public class Plateau extends JPanel implements ActionListener {
     protected BufferedImage image;
     public Vivant[][] simulation;
     public static int tailleCase = 15;
@@ -20,11 +22,14 @@ public class Plateau extends JPanel {
     protected int iterations = 0;
     public Path dossier;
     protected boolean capturerSimul = false;
+    private Timer perfTimer = new Timer(1000, this);
+    private int perCompteur = 0;
 
     public Plateau(int taille) {
         super();
         this.taille = taille;
         genererPlateau(taille);
+        perfTimer.start();
         image = new BufferedImage((taille + 1) * tailleCase, (taille + 1) * tailleCase, BufferedImage.TYPE_INT_RGB);
     }
 
@@ -139,6 +144,7 @@ public class Plateau extends JPanel {
         }
         //Pos.setTab(simulation, newPos, ilVaBouger);
         ajouterVivant(ilVaBouger, newPos);
+        perCompteur+=1;
     }
 
     public void genererAlea(int nbrePotiron, int nbreLapins, Graph graph) {
@@ -231,5 +237,11 @@ public class Plateau extends JPanel {
 
     public void lancerFfmpeg() {
         System.out.println("ffmpeg -r 60 -f image2 -s 500x500 -i \"" + dossier.toString() + "\"/%09d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p \"" + dossier.toString() + "\".mp4");
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        System.out.println(perCompteur+" itérations/seconde");
+        perCompteur=0;
     }
 }
