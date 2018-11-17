@@ -1,71 +1,89 @@
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
-
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 
-public class Graph extends JPanel {
+public class Graph extends JPanel implements ActionListener {
     protected BufferedImage image;
-    public int[] serieDonnee;
+    //public int[] serieDonnee;
+    public int[] serieLapins;
+    public int[] seriePotirons;
     public int zoomX=1;
 
     private int longeur;
-    private int index=0;
+    private int indexLapins=0;
+    private int indexPotirons=0;
 
     public Graph(int timeWindow) {
         super();
         longeur = timeWindow;
-        serieDonnee = new int[longeur];
-        //serieDonnee = new int[getWidth()];
-        //image = new BufferedImage(timeWindow*zoomX, getHeight(),BufferedImage.TYPE_INT_RGB);
-        image = new BufferedImage(timeWindow*zoomX, 700,BufferedImage.TYPE_INT_RGB);
+        //serieDonnee = new int[longeur];
+        serieLapins = new int[longeur];
+        seriePotirons = new int[longeur];
+        image = new BufferedImage(timeWindow*zoomX, 700,BufferedImage.TYPE_USHORT_555_RGB);
+        new Timer(16, this).start();
+    }
+
+    public void addLapins(int valeur) {
         new Thread(()->{
-            while (1>0){
-                repaint();
+            if(indexLapins<longeur-1){
+                serieLapins[indexLapins] = valeur;
                 try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                     tracerPoint(indexLapins, serieLapins, Lapin.COULEUR);
+                    effacerPoint(indexLapins+1, serieLapins);
+                    effacerPoint(indexLapins+2, serieLapins);
+                    effacerPoint(indexLapins+3, serieLapins);
+                    effacerPoint(indexLapins+4, serieLapins);
+                    effacerPoint(indexLapins+5, serieLapins);
+                    indexLapins++;
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    System.out.println("lap" + indexLapins + ")=" + serieLapins[indexLapins]);
                 }
+            }
+            else {
+                decaler(1);
+                addLapins(valeur);
+            }
+        }).start();
+    }
+    public void addPotirons(int valeur) {
+        new Thread(()->{
+            if(indexPotirons<longeur-1){
+                seriePotirons[indexPotirons] = valeur;
+                try {
+                    tracerPoint(indexPotirons, seriePotirons, Potiron.COULEUR);
+                    effacerPoint(indexPotirons+1, seriePotirons);
+                    effacerPoint(indexPotirons+2, seriePotirons);
+                    effacerPoint(indexPotirons+3, seriePotirons);
+                    effacerPoint(indexPotirons+4, seriePotirons);
+                    effacerPoint(indexPotirons+5, seriePotirons);
+                    indexPotirons++;
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    System.out.println("pot" + indexPotirons + ")=" + seriePotirons[indexPotirons]);
+                }
+            }
+            else {
+                decaler(1);
+                addPotirons(valeur);
             }
         }).start();
     }
 
-    public void addData(int valeur) {
-        new Thread(()->{
-        if(index<longeur-1){
-            serieDonnee[index] = valeur;
-            try {
-                tracerPoint(index);
-                effacerPoint(index+1);
-                effacerPoint(index+2);
-                effacerPoint(index+3);
-                effacerPoint(index+4);
-                effacerPoint(index+5);
-                index++;
-            } catch (ArrayIndexOutOfBoundsException e) {
-                System.out.println("f(" + index + ")=" + serieDonnee[index]);
-            }
-        }
-        else {
-            decaler(1);
-            addData(valeur);
-        }
-        }).start();
+    private void tracerPoint(int index, int[] serieDonnee, Color couleur) {
+        image.setRGB(index * zoomX, image.getHeight()-1 - serieDonnee[index], couleur.getRGB());
     }
-    private void tracerPoint(int index) {
-        image.setRGB(index * zoomX, image.getHeight()-1 - serieDonnee[index], new Color(26, 255, 47).getRGB());
-    }
-    private void effacerPoint(int x) {try {
+    private void effacerPoint(int x, int[] serieDonnee) {try {
         image.setRGB(x * zoomX, image.getHeight() - 1 - serieDonnee[x], new Color(0, 0, 0).getRGB());
     }catch (ArrayIndexOutOfBoundsException e){}
     }
 
     public void clean() {
-        image = new BufferedImage(longeur*zoomX, 700,BufferedImage.TYPE_INT_RGB);
-        index=0;
+        image.flush();
+        image=null;
+        image = new BufferedImage(longeur*zoomX, 700,BufferedImage.TYPE_USHORT_555_RGB);
+        indexLapins=0;
+        indexPotirons=0;
     }
 
     public void decaler(int n) {
@@ -76,21 +94,9 @@ public class Graph extends JPanel {
         index = longeur - 1 - n;
         serieDonnee = nouveau;
         nouveau = null;*/
-        index=0; //en fait tracer juste avant le précédent ça va ...
-    }
-
-    public void tracer() {
-        // for (int i = 0; i < serieDonnee.length; i++) {
-        //    /* if(serieDonnee[i]==0)
-        //         continue;
-        //     for(int y=0;y<image.getHeight()-1;y++){
-        //        image.setRGB(i*zoomX,y,Color.BLACK.getRGB()); // on efface l'ordonnée précédente
-        //     }*/
-        //     try{image.setRGB(i*zoomX,image.getHeight()-serieDonnee[i], new Color(26, 255, 47).getRGB());}
-        //     catch (ArrayIndexOutOfBoundsException e) {
-        //         System.out.println("f(" + i + ")=" + serieDonnee[i]);
-        //     }
-        // }
+        //index=0; //en fait tracer juste avant le précédent ça va ...
+        indexLapins=0;
+        indexPotirons=0;
     }
 
     public void paintComponent(Graphics g) {
@@ -125,13 +131,18 @@ public class Graph extends JPanel {
             int finalI = i;
             new Thread(()->{
                 double y = 60*Math.sin(0.05*finalI);
-                g.addData((int)y);
+                g.addLapins(100+(int)y);
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(16);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }).start();
         }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        repaint();
     }
 }

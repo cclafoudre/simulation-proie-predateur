@@ -22,7 +22,7 @@ public class Affichage extends JFrame implements ActionListener {
 
     private JMenu parametres = new JMenu("Paramètres");
     private JMenuItem infoZoom = new JMenuItem("Zoom");
-    private JSlider tailleCase = new JSlider(4,70,10);
+    private JSlider tailleCase = new JSlider(4,50,5);
     private JMenuItem vitesseAnim = new JMenuItem("Délai de simulation");
     private JSlider slideVitesse = new JSlider(1,100,50);
     private JMenuItem cleanGraph = new JMenuItem("Remise à zéro du graphique");
@@ -129,7 +129,8 @@ public class Affichage extends JFrame implements ActionListener {
             //System.out.println("On effectue un tour de simulation");
             //new Thread(()->{
             plateau.simuler();
-            graphique.addData(plateau.getNbreVivants());
+            graphique.addLapins(  plateau.getNbreLapins());
+            graphique.addPotirons(plateau.getNbrePotirons());
             //}).start();
             //effectuer un tour
         }

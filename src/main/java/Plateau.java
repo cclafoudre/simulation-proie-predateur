@@ -4,10 +4,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,7 +30,7 @@ public class Plateau extends JPanel implements ActionListener {
         this.taille = taille;
         genererPlateau(taille);
         perfTimer.start();
-        image = new BufferedImage((taille + 1) * tailleCase, (taille + 1) * tailleCase, BufferedImage.TYPE_INT_RGB);
+        image = new BufferedImage((taille + 1) * tailleCase, (taille + 1) * tailleCase, BufferedImage.TYPE_USHORT_555_RGB);
         fps = new Timer(16, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -140,7 +138,7 @@ public class Plateau extends JPanel implements ActionListener {
     public void zoom(int facteur) {
         fps.stop();
         tailleCase = facteur;
-        image = new BufferedImage((taille + 1) * tailleCase, (taille + 1) * tailleCase, BufferedImage.TYPE_INT_RGB);
+        image = new BufferedImage((taille + 1) * tailleCase, (taille + 1) * tailleCase, BufferedImage.TYPE_USHORT_555_RGB);
         fps.start();
     }
 
@@ -180,7 +178,8 @@ public class Plateau extends JPanel implements ActionListener {
             Pos pos = Pos.getRandomPos(taille);
             if (Pos.getTab(simulation, pos) == null) {
                 ajouterVivant(new Potiron(), pos);
-                graph.addData(getNbreVivants());
+                //graph.addLapins(getNbreLapins());
+                graph.addPotirons(getNbrePotirons());
                 nP[0] += 1;
             }
         }
@@ -188,7 +187,8 @@ public class Plateau extends JPanel implements ActionListener {
             Pos pos = Pos.getRandomPos(taille);
             if (Pos.getTab(simulation, pos) == null) {
                 ajouterVivant(new Lapin(), pos);
-                graph.addData(getNbreVivants());
+                graph.addLapins(getNbreLapins());
+                //graph.addPotirons(getNbrePotirons());
                 nL[0] += 1;
             }
         }
@@ -211,17 +211,28 @@ public class Plateau extends JPanel implements ActionListener {
             Pos pos = Pos.getRandomPos(taille);
             if (Pos.getTab(simulation, pos) != null) {
                 enleverVivant(pos);
-                graph.addData(getNbreVivants());
+                graph.addLapins(getNbreLapins());
+                graph.addPotirons(getNbrePotirons());
                 n[0] += 1;
             }
         }
     }
 
-    public int getNbreVivants() {
+    public int getNbrePotirons() {
         int n = 0;
         for (int y = 0; y < simulation.length; y++) {
             for (int x = 0; x < simulation[y].length; x++) {
-                if (simulation[y][x] != null)
+                if (simulation[y][x] instanceof Potiron)
+                    n++;
+            }
+        }
+        return n;
+    }
+    public int getNbreLapins() {
+        int n = 0;
+        for (int y = 0; y < simulation.length; y++) {
+            for (int x = 0; x < simulation[y].length; x++) {
+                if (simulation[y][x] instanceof Lapin)
                     n++;
             }
         }
