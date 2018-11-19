@@ -4,6 +4,9 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class Affichage extends JFrame implements ActionListener {
     public Timer monTimer;
@@ -22,7 +25,7 @@ public class Affichage extends JFrame implements ActionListener {
 
     private JMenu parametres = new JMenu("Paramètres");
     private JMenuItem infoZoom = new JMenuItem("Zoom");
-    private JSlider tailleCase = new JSlider(4,50,5);
+    private JSlider tailleCase = new JSlider(4,50,Plateau.tailleCase);
     private JMenuItem vitesseAnim = new JMenuItem("Délai de simulation");
     private JSlider slideVitesse = new JSlider(1,100,50);
     private JMenuItem cleanGraph = new JMenuItem("Remise à zéro du graphique");
@@ -112,16 +115,18 @@ public class Affichage extends JFrame implements ActionListener {
         graphique = Graph.lancer();
     }
 
-    public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    public static void main(String[] args) throws URISyntaxException, IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
+        URI nomJar = Affichage.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+        if (args.length == 0 && nomJar.toString().endsWith("jar")) {
+                // re-launch the app itselft with VM option passed
+            System.out.println(nomJar.getPath());
+            Runtime.getRuntime().exec(new String[] {"java", "-Xmx100m", "-jar", nomJar.getPath(), "test"}); //ça évite que le programme prenne 1Go de RAM ...
+            System.exit(0);
+        } //merci à internet pour l'astuce !
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         //    UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-        } catch (ClassNotFoundException e) {
-        } catch (InstantiationException e) {
-        } catch (IllegalAccessException e) {
-        } catch (UnsupportedLookAndFeelException e) {
-        }
         new Affichage();
+        JOptionPane.showMessageDialog(null,new JLabel("Task failed successfully !"),"Windows XP Simulator",JOptionPane.PLAIN_MESSAGE);
     }
 
     public void actionPerformed(ActionEvent e) {

@@ -22,7 +22,7 @@ public class Graph extends JPanel implements ActionListener {
         serieLapins = new int[longeur];
         seriePotirons = new int[longeur];
         image = new BufferedImage(timeWindow*zoomX, 700,BufferedImage.TYPE_USHORT_555_RGB);
-        new Timer(16, this).start();
+        new Timer(50, this).start();
     }
 
     public void addLapins(int valeur) {
