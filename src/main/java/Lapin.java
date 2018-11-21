@@ -6,12 +6,16 @@ import java.awt.*;
 public class Lapin extends Vivant{
     public int pointsDeNutrition;
     public static Color COULEUR= new Color(255, 255, 255);
+    public static int PV_INITIAL=5;
 
     public Lapin(){
-        super(5);
+        super(PV_INITIAL);
     }
     public void manger() {
-        pointsDeNutrition+=1;
+        if(pointsDeVie<PV_INITIAL)
+            pointsDeVie+=1;
+        else
+            pointsDeNutrition+=1;
     }
 
     public void jourSansManger(){

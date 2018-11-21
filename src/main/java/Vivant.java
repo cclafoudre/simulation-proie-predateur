@@ -1,7 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class Vivant {
+public class Vivant implements ActionListener {
     //public Vivant auDessus;
     //public Vivant enDessous;
     //public Vivant aDroite;
@@ -11,13 +13,18 @@ public class Vivant {
     public Pos position;
 
     public static Color COULEUR = new Color(64, 123, 67);
+    public static int DELAI_TIMER=3000;
     public int pointsDeVie = 0;
+
+    public Timer timer;
 
     public Vivant() {
         this(1);
     }
     public Vivant(int pv) {
         pointsDeVie = pv;
+        timer = new Timer(DELAI_TIMER, this);
+        timer.start(); //commenter pour désactiver la mort des vivants
     }
 
     public void setX(int x) {
@@ -46,4 +53,20 @@ public class Vivant {
         return pointsDeVie > 0;
     }
 
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        pointsDeVie-=1;
+    }
+
+    public void setDelay(int ms){
+        DELAI_TIMER=ms;
+        timer.setDelay(ms);
+    }
+
+    public void startTimer(){
+        timer.start();
+    }
+    public void stopTimer() {
+        timer.stop();
+    }
 }

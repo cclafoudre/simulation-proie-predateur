@@ -43,4 +43,15 @@ public class Pos {
     public static void setTab(Object[][] tab, Pos pos, Object obj){
         tab[pos.getY()][pos.getX()] = obj;
     }
+
+    @Override
+    public String toString() {
+        return "x="+getX()+" y="+getY();
+    }
+
+    public boolean positionValide(int taille){
+        if(0<X && 0<Y && X<taille && Y<taille)
+            return true;
+        return false;
+    }
 }

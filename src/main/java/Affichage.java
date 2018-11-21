@@ -26,7 +26,7 @@ public class Affichage extends JFrame implements ActionListener {
     private JMenu parametres = new JMenu("Paramètres");
     private JMenuItem infoZoom = new JMenuItem("Zoom");
     private JSlider tailleCase = new JSlider(4,50,Plateau.tailleCase);
-    private JMenuItem vitesseAnim = new JMenuItem("Délai de simulation");
+    private JMenuItem vivantsTimer = new JMenuItem("CHanger le délai de mort");
     private JSlider slideVitesse = new JSlider(1,100,50);
     private JMenuItem cleanGraph = new JMenuItem("Remise à zéro du graphique");
     private JCheckBoxMenuItem capturePix = new JCheckBoxMenuItem("Enregistrer la simulation");
@@ -40,14 +40,14 @@ public class Affichage extends JFrame implements ActionListener {
         setSize(800,850);
         setTitle("Simluation Proie-prédateur");
         setLocationRelativeTo(null);
-        plateau = new Plateau(45);
-        zoneAffichage.add(plateau);
         monTimer = new Timer(slideVitesse.getValue(),this);
+        plateau = new Plateau(45, monTimer);
+        zoneAffichage.add(plateau);
 
         boutonAction.addActionListener(this);
         boutonStart.addActionListener(this);
         boutonStop.addActionListener(this);
-        vitesseAnim.addActionListener(this);
+        vivantsTimer.addActionListener(this);
         plusDeVivants.addActionListener(this);
         moinsDeVivants.addActionListener(this);
         cleanGraph.addActionListener(this);
@@ -83,8 +83,12 @@ public class Affichage extends JFrame implements ActionListener {
         parametres.add(textFPS);
         parametres.add(slideFPS);
         parametres.add(new JSeparator());
-        parametres.add(vitesseAnim);
+        JMenuItem a1 = new JMenuItem("Délai de simulation");
+        a1.setEnabled(false);
+        parametres.add(a1);
         parametres.add(slideVitesse);
+        parametres.add(new JSeparator());
+        parametres.add(vivantsTimer);
         parametres.add(new JSeparator());
         parametres.add(cleanGraph);
         barreMenus.add(parametres);
@@ -124,9 +128,8 @@ public class Affichage extends JFrame implements ActionListener {
             System.exit(0);
         } //merci à internet pour l'astuce !
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        //    UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
         new Affichage();
-        JOptionPane.showMessageDialog(null,new JLabel("Task failed successfully !"),"Windows XP Simulator",JOptionPane.PLAIN_MESSAGE);
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -134,8 +137,12 @@ public class Affichage extends JFrame implements ActionListener {
             //System.out.println("On effectue un tour de simulation");
             //new Thread(()->{
             plateau.simuler();
-            graphique.addLapins(  plateau.getNbreLapins());
-            graphique.addPotirons(plateau.getNbrePotirons());
+            int nbLap = plateau.getNbreLapins();
+            int nbPot = plateau.getNbrePotirons();
+            graphique.addLapins(  nbLap);
+            graphique.addPotirons(nbPot);
+            if(nbLap==0 && nbPot==0)
+                monTimer.stop();
             //}).start();
             //effectuer un tour
         }
@@ -151,20 +158,19 @@ public class Affichage extends JFrame implements ActionListener {
         if(e.getSource().equals(capturePix)){plateau.toggleCapture();}
         if(e.getSource().equals(genVid)){plateau.lancerFfmpeg();}
 
-        if(e.getSource().equals(vitesseAnim)){
-            System.out.println("Choix de vitesse");
+        if(e.getSource().equals(vivantsTimer)){
+            System.out.println("Choix de Vitesse de mort");
             String reponse = JOptionPane.showInputDialog(
                     this,
-                    "Délai entre les simulations (ms) :",
+                    "Délai entre les pertes de PV (ms) :",
                     "Paramètres",
                     JOptionPane.PLAIN_MESSAGE);
             try {
                 int vitesse = Integer.parseInt(reponse);
-                System.out.println("Délai changée à "+vitesse);
-                monTimer.setDelay(vitesse);
+                System.out.println("Délai changé à "+vitesse);
+                Vivant.DELAI_TIMER = vitesse;
+                plateau.setMortDelay(vitesse);
             } catch (NumberFormatException e1){ }
         }
-
-        //fonction
     }
 }

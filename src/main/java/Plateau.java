@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.Random;
 
 public class Plateau extends JPanel implements ActionListener {
     protected BufferedImage image;
@@ -24,10 +25,12 @@ public class Plateau extends JPanel implements ActionListener {
     private int perCompteur = 0;
 
     public Timer fps;
+    public Timer simulTimer;
 
-    public Plateau(int taille) {
+    public Plateau(int taille, Timer eventTimer) {
         super();
         this.taille = taille;
+        simulTimer = eventTimer;
         genererPlateau(taille);
         perfTimer.start();
         image = new BufferedImage((taille + 1) * tailleCase, (taille + 1) * tailleCase, BufferedImage.TYPE_USHORT_555_RGB);
@@ -41,13 +44,29 @@ public class Plateau extends JPanel implements ActionListener {
     }
 
     public void simuler() {
-        mouvementTest();
+        //mouvementTest();
+        menageDesMorts();
+        deplacement();
+        perCompteur+=1;
 
         /*new Thread(this::mouvementTest).start();
         new Thread(this::mouvementTest).start();
         new Thread(()->{
             mouvementTest();
         }).start();*/
+    }
+
+    private void deplacement() {
+        Pos initial = getRandomVivant();
+        //int dx= (int) (Math.random()*3-1);
+        int dx= (int) new Random().nextInt(3)-1;
+        int dy= new Random().nextInt(3)-1;
+        //int dy= (int) (Math.random()*3-1);
+        Pos destination = new Pos(initial.getX()+dx, initial.getY()+dy);
+        if(destination.positionValide(taille) && estVide(destination)){
+            Vivant vaBouger = enleverVivant(initial);
+            ajouterVivant(vaBouger, destination);
+        }
     }
 
     public void ajouterVivant(Vivant nouveau, Pos pos) {
@@ -68,6 +87,10 @@ public class Plateau extends JPanel implements ActionListener {
 
     public Vivant selectVivant(Pos pos) {
         return (Vivant) Pos.getTab(simulation, pos);
+    }
+
+    public boolean estVide(Pos pos){
+        return Pos.getTab(simulation, pos) == null;
     }
 
     public void genererPlateau(int taille) {
@@ -136,10 +159,10 @@ public class Plateau extends JPanel implements ActionListener {
     }
 
     public void zoom(int facteur) {
-        fps.stop();
+        //fps.stop();
         tailleCase = facteur;
         image = new BufferedImage((taille + 1) * tailleCase, (taille + 1) * tailleCase, BufferedImage.TYPE_USHORT_555_RGB);
-        fps.start();
+        //fps.start();
     }
 
     private void mouvementTest() { //fait un mouvement aléatoire
@@ -157,7 +180,6 @@ public class Plateau extends JPanel implements ActionListener {
         }
         //Pos.setTab(simulation, newPos, ilVaBouger);
         ajouterVivant(ilVaBouger, newPos);
-        perCompteur+=1;
     }
 
     public void genererAlea(int nbrePotiron, int nbreLapins, Graph graph) {
@@ -269,5 +291,38 @@ public class Plateau extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         System.out.println(perCompteur+" itérations/seconde");
         perCompteur=0;
+    }
+
+    public Pos getRandomVivant() {
+        Pos pos = Pos.getRandomPos(taille);
+        while (Pos.getTab(simulation, pos) == null) {
+            pos = Pos.getRandomPos(taille);
+        }
+        return pos;
+    }
+
+    public void menageDesMorts() {
+        int nbVivants=0;
+        for (int y = 0; y < taille; y++) {
+            for (int x = 0; x < taille; x++) {
+                if(simulation[y][x]!=null) {
+                    if (!simulation[y][x].visible())
+                        simulation[y][x] = null;
+                    else
+                        nbVivants+=1;
+                }
+            }
+        }
+        if(nbVivants == 0)
+            simulTimer.stop();
+    }
+
+    public void setMortDelay(int ms){
+        for (int y = 0; y < taille; y++) {
+            for (int x = 0; x < taille; x++) {
+                if(simulation[y][x]!=null)
+                    simulation[y][x].setDelay(ms);
+            }
+        }
     }
 }
