@@ -114,9 +114,10 @@ public class Affichage extends JFrame implements ActionListener {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            plateau.genererAlea(120,50, graphique);
+            plateau.genererAlea(1000,50, graphique);
         }).start();
         graphique = Graph.lancer();
+        JOptionPane.showMessageDialog(null,new JLabel("Veuillez lancer la simulation depuis le menu Actions"),"Task failed successfully !",JOptionPane.INFORMATION_MESSAGE);
     }
 
     public static void main(String[] args) throws URISyntaxException, IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
@@ -141,8 +142,6 @@ public class Affichage extends JFrame implements ActionListener {
             int nbPot = plateau.getNbrePotirons();
             graphique.addLapins(  nbLap);
             graphique.addPotirons(nbPot);
-            if(nbLap==0 && nbPot==0)
-                monTimer.stop();
             //}).start();
             //effectuer un tour
         }

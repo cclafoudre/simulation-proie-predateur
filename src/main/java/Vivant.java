@@ -13,7 +13,7 @@ public class Vivant implements ActionListener {
     public Pos position;
 
     public static Color COULEUR = new Color(64, 123, 67);
-    public static int DELAI_TIMER=3000;
+    public static int DELAI_TIMER=7000;
     public int pointsDeVie = 0;
 
     public Timer timer;
@@ -55,12 +55,12 @@ public class Vivant implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        pointsDeVie-=1;
+        vivre(e);
     }
 
     public void setDelay(int ms){
         DELAI_TIMER=ms;
-        timer.setDelay(ms);
+        timer.setDelay(ms+(int) (Math.random()*20));
     }
 
     public void startTimer(){
@@ -68,5 +68,9 @@ public class Vivant implements ActionListener {
     }
     public void stopTimer() {
         timer.stop();
+    }
+
+    public void vivre(ActionEvent e){
+        pointsDeVie-=1;
     }
 }

@@ -3,6 +3,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +23,7 @@ public class Plateau extends JPanel implements ActionListener {
     public Path dossier;
     protected boolean capturerSimul = false;
     private Timer perfTimer = new Timer(1000, this);
-    private int perCompteur = 0;
+    private int perfCompteur = 0;
 
     public Timer fps;
     public Timer simulTimer;
@@ -44,29 +45,68 @@ public class Plateau extends JPanel implements ActionListener {
     }
 
     public void simuler() {
-        //mouvementTest();
-        menageDesMorts();
-        deplacement();
-        perCompteur+=1;
+        Graphics2D g2d = image.createGraphics();
+        g2d.setColor(Color.red);
+        g2d.fill(new Ellipse2D.Float(0, 0, 7, 7));
+        g2d.dispose(); //ça trace un point rouge en haut pour savoir si la simulation tourne, et à quelle vitesse
+        repaint();
 
-        /*new Thread(this::mouvementTest).start();
-        new Thread(this::mouvementTest).start();
-        new Thread(()->{
-            mouvementTest();
-        }).start();*/
+        //mouvementTest();
+        menageDesMorts(); //supprimme les vivants qui n'ont plus de points de vie
+        mangerBouger(); //action principale
+        perfCompteur +=1;
+
     }
 
-    private void deplacement() {
+    /**
+     * Entrée d'une action sur les vivants
+     */
+    private void mangerBouger() {
         Pos initial = getRandomVivant();
-        //int dx= (int) (Math.random()*3-1);
-        int dx= (int) new Random().nextInt(3)-1;
+        if((selectVivant(initial) instanceof Lapin)) { //le fait manger si c'est un lapin
+            lapinsMangent(initial);
+        }
+        deplacement(initial); //il se séplace dans tous les cas
+    }
+
+    private void deplacement(Pos initial) {
+        //Pos initial = getRandomVivant();
+        int dx= new Random().nextInt(3)-1; //on bouge d'une case dans une direction au hazard (& en diagoanel)
         int dy= new Random().nextInt(3)-1;
-        //int dy= (int) (Math.random()*3-1);
         Pos destination = new Pos(initial.getX()+dx, initial.getY()+dy);
         if(destination.positionValide(taille) && estVide(destination)){
             Vivant vaBouger = enleverVivant(initial);
             ajouterVivant(vaBouger, destination);
         }
+    }
+
+    private void lapinsMangent(Pos initial) {
+        //Pos initial = getRandomVivant();
+            Lapin predateur = (Lapin) selectVivant(initial);
+            for (int j = - 1; j <  1; j++) {
+                for (int i = -1; i < 1; i++) {
+                    Pos dest = new Pos(predateur.getPos().getX() + i, predateur.getPos().getY() + j);
+                    if (dest.positionValide(taille)) {
+                        if (selectVivant(dest) instanceof Potiron) {
+                            enleverVivant(dest);
+                            predateur.manger();
+                        }
+                    }
+                }
+            }
+        /*
+        Pos destination = new Pos(initial.getX(), initial.getY());
+        if(destination.positionValide(taille)){
+            Vivant vaBouger = enleverVivant(initial);
+            if(estVide(destination))
+                ajouterVivant(vaBouger, destination);
+            if(selectVivant(destination) instanceof Potiron && vaBouger instanceof Lapin) {
+                Lapin vaManger = (Lapin) vaBouger;
+                vaManger.manger();
+                enleverVivant(destination); //on enlève la proie mangée
+                ajouterVivant(vaManger, destination); //on déplace le mangeur
+            }
+        }*/
     }
 
     public void ajouterVivant(Vivant nouveau, Pos pos) {
@@ -95,25 +135,20 @@ public class Plateau extends JPanel implements ActionListener {
 
     public void genererPlateau(int taille) {
         simulation = new Vivant[taille][taille];
-        simulation[0][0] = new Lapin();
-        simulation[2][0] = new Potiron();
-        simulation[2][1] = new Lapin();
-        simulation[5][5] = new Lapin();
-        simulation[taille - 2][taille - 2] = new Potiron();
-        simulation[taille - 5][taille - 2] = new Potiron();
-        simulation[taille - 2][taille - 5] = new Potiron();
-        simulation[taille - 1][taille - 1] = new Potiron();
-        simulation[taille - 1][taille - 2] = new Lapin();
-        simulation[taille - 2][taille - 1] = new Lapin();
     }
 
     public void afficherPlateau() {
         for (int y = 0; y < taille + 1; y++) {
-            for (int x = 0; x < taille + 1; x++) {
+            for (int x = 0; x < taille + 1; x++) { //itère le tableau "simulation" dans ses 2 dimensiosn
                 if (x < taille && y < taille)
-                    afficherCase(simulation[y][x], tailleCase * (x + 1), tailleCase * (y + 1));
+                    afficherCase(simulation[y][x], tailleCase * (x + 1), tailleCase * (y + 1)); //décalage d'indice pour ne pas dessiner les pixels en dehors
+                //ça effectue un produit en croix pour dessiner chaque case comme plusieurs pixels
             }
         }
+        Graphics2D g2d = image.createGraphics();
+        g2d.setColor(Color.BLACK);
+        g2d.fill(new Ellipse2D.Float(0, 0, 7, 7));
+        g2d.dispose();
         repaint();
         if (!capturerSimul) //si on ne demande pas de capturer, les images, le code s'arrête ici
             return;
@@ -128,7 +163,7 @@ public class Plateau extends JPanel implements ActionListener {
 
     private void afficherCase(Vivant vivant, int x, int y) {
         for (int j = -tailleCase / 2 + 1; j < tailleCase / 2 - 1; j++) {
-            for (int i = -tailleCase / 2 + 1; i < tailleCase / 2 - 1; i++) {
+            for (int i = -tailleCase / 2 + 1; i < tailleCase / 2 - 1; i++) { //itère autour du pixel central
                 int X = x + i;
                 int Y = y + j;
                 try {
@@ -151,7 +186,7 @@ public class Plateau extends JPanel implements ActionListener {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (image != null) {
-            g.drawImage(image,
+            g.drawImage(image, //dessine l'image au milieu de la fenetre
                     (getWidth() - image.getWidth()) / 2,
                     (getHeight() - image.getHeight()) / 2,
                     null);
@@ -187,7 +222,7 @@ public class Plateau extends JPanel implements ActionListener {
         final int[] nL = {0};
         Thread safe = new Thread(() -> {
             try {
-                Thread.sleep(2000);
+                Thread.sleep(2000); //coupe l'action si elle dure plus de 2s
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -265,7 +300,7 @@ public class Plateau extends JPanel implements ActionListener {
         capturerSimul = true;
         if (iterations == 0) { //si on reprend la capture, pas besoin de recréer le dossier
             try {
-                dossier = Files.createDirectories(Paths.get("simul-" + new Date().toString()));
+                dossier = Files.createDirectories(Paths.get("simul-" + new Date().toString())); //crée
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -289,8 +324,8 @@ public class Plateau extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        System.out.println(perCompteur+" itérations/seconde");
-        perCompteur=0;
+        System.out.println(perfCompteur +" itérations/seconde");
+        perfCompteur =0;
     }
 
     public Pos getRandomVivant() {
@@ -301,10 +336,18 @@ public class Plateau extends JPanel implements ActionListener {
         return pos;
     }
 
+    public Pos getRandomVide(){
+        Pos pos = Pos.getRandomPos(taille);
+        while (Pos.getTab(simulation, pos) != null) {
+            pos = Pos.getRandomPos(taille);
+        }
+        return pos;
+    }
+
     public void menageDesMorts() {
         int nbVivants=0;
-        for (int y = 0; y < taille; y++) {
-            for (int x = 0; x < taille; x++) {
+        for (int y = 0; y < taille; y++) { //parcourt tout le tableau pour supprimmer
+            for (int x = 0; x < taille; x++) { // les vivants qui n'ont plus de PV
                 if(simulation[y][x]!=null) {
                     if (!simulation[y][x].visible())
                         simulation[y][x] = null;
@@ -313,11 +356,13 @@ public class Plateau extends JPanel implements ActionListener {
                 }
             }
         }
-        if(nbVivants == 0)
-            simulTimer.stop();
+        if(nbVivants == 0) {
+            System.out.println("Arrêt de la simulation");
+            simulTimer.stop(); //ça marche pas en fait
+        }
     }
 
-    public void setMortDelay(int ms){
+    public void setMortDelay(int ms){ //itère tout le tableau des vivants pour leur changer leur délai de vérification de mort
         for (int y = 0; y < taille; y++) {
             for (int x = 0; x < taille; x++) {
                 if(simulation[y][x]!=null)

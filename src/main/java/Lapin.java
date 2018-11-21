@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.awt.event.ActionEvent;
 
 /**
  * Il peut se déplacer
@@ -11,9 +12,12 @@ public class Lapin extends Vivant{
     public Lapin(){
         super(PV_INITIAL);
     }
+
     public void manger() {
-        if(pointsDeVie<PV_INITIAL)
-            pointsDeVie+=1;
+        if(pointsDeVie<PV_INITIAL) {
+            //pointsDeVie += 1;
+            pointsDeVie = PV_INITIAL;
+        }
         else
             pointsDeNutrition+=1;
     }
@@ -23,5 +27,13 @@ public class Lapin extends Vivant{
     }
     public Color getCouleur() {
         return COULEUR;
+    }
+
+    @Override
+    public void vivre(ActionEvent e){
+        if(pointsDeNutrition<=0)
+            pointsDeVie-=1;
+        else
+            jourSansManger();
     }
 }

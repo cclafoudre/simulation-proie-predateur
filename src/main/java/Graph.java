@@ -38,7 +38,7 @@ public class Graph extends JPanel implements ActionListener {
                     effacerPoint(indexLapins+5, serieLapins);
                     indexLapins++;
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    System.out.println("lap" + indexLapins + ")=" + serieLapins[indexLapins]);
+                    //System.out.println("lap(" + indexLapins + ")=" + serieLapins[indexLapins]);
                 }
             }
             else {
@@ -60,7 +60,7 @@ public class Graph extends JPanel implements ActionListener {
                     effacerPoint(indexPotirons+5, seriePotirons);
                     indexPotirons++;
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    System.out.println("pot" + indexPotirons + ")=" + seriePotirons[indexPotirons]);
+                    //System.out.println("pot(" + indexPotirons + ")=" + seriePotirons[indexPotirons]);
                 }
             }
             else {

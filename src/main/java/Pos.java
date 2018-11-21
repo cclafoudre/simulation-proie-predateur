@@ -50,8 +50,6 @@ public class Pos {
     }
 
     public boolean positionValide(int taille){
-        if(0<X && 0<Y && X<taille && Y<taille)
-            return true;
-        return false;
+        return  (0<X && 0<Y && X<taille && Y<taille);
     }
 }
