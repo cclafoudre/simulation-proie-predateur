@@ -148,10 +148,10 @@ public class Affichage extends JFrame implements ActionListener {
         if(e.getSource().equals(cleanGraph)){graphique.clean();}
 
 
-        if(e.getSource().equals(boutonStart)){monTimer.start();}
-        if(e.getSource().equals(boutonStop)){monTimer.stop();}
+        if(e.getSource().equals(boutonStart)){monTimer.start();Vivant.SIMULATION_ACTIVE=true;}
+        if(e.getSource().equals(boutonStop)){monTimer.stop();Vivant.SIMULATION_ACTIVE=false;}
 
-        if(e.getSource().equals(plusDeVivants)){plateau.genererAlea(100,100, graphique);}
+        if(e.getSource().equals(plusDeVivants)){plateau.genererAlea(200,10, graphique);}
         if(e.getSource().equals(moinsDeVivants)){plateau.supprAlea(100, graphique);}
 
         if(e.getSource().equals(capturePix)){plateau.toggleCapture();}

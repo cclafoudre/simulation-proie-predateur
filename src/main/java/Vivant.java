@@ -14,6 +14,7 @@ public class Vivant implements ActionListener {
 
     public static Color COULEUR = new Color(64, 123, 67);
     public static int DELAI_TIMER=7000;
+    public static boolean SIMULATION_ACTIVE; //active/désactive la mort des vivants
     public int pointsDeVie = 0;
 
     public Timer timer;
@@ -55,7 +56,8 @@ public class Vivant implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        vivre(e);
+        if(SIMULATION_ACTIVE)
+            vivre(e);
     }
 
     public void setDelay(int ms){
