@@ -27,29 +27,33 @@ public class Plateau extends JPanel implements ActionListener {
 
     public Timer fps;
     public Timer simulTimer;
+    Grille maGrille;
 
     public Plateau(int taille, Timer eventTimer) {
         super();
         this.taille = taille;
         simulTimer = eventTimer;
         genererPlateau(taille);
+        genererAlea(1,1, Graph.lancer());
         perfTimer.start();
         image = new BufferedImage((taille + 1) * tailleCase, (taille + 1) * tailleCase, BufferedImage.TYPE_USHORT_555_RGB);
         fps = new Timer(16, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 afficherPlateau();
+                maGrille.repaint();
             }
         });
         fps.start();
+        maGrille = Grille.lancerGrille(simulation);
     }
 
     public void simuler() {
-        Graphics2D g2d = image.createGraphics();
+        /*Graphics2D g2d = image.createGraphics();
         g2d.setColor(Color.red);
         g2d.fill(new Ellipse2D.Float(0, 0, 7, 7));
         g2d.dispose(); //ça trace un point rouge en haut pour savoir si la simulation tourne, et à quelle vitesse
-        repaint();
+        repaint();*/
 
         //mouvementTest();
         menageDesMorts(); //supprimme les vivants qui n'ont plus de points de vie
@@ -145,11 +149,12 @@ public class Plateau extends JPanel implements ActionListener {
                 //ça effectue un produit en croix pour dessiner chaque case comme plusieurs pixels
             }
         }
-        Graphics2D g2d = image.createGraphics();
+        repaint();
+        /*Graphics2D g2d = image.createGraphics();
         g2d.setColor(Color.BLACK);
         g2d.fill(new Ellipse2D.Float(0, 0, 7, 7));
         g2d.dispose();
-        repaint();
+        repaint();*/
         if (!capturerSimul) //si on ne demande pas de capturer, les images, le code s'arrête ici
             return;
         iterations += 1;

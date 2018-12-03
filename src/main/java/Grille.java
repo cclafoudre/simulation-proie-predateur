@@ -1,21 +1,48 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Grille  extends Canvas {
     GraphicsConfiguration gc;
     Rectangle bords;
+    Image buffer;
+    Image buffer2;
     int taille = 45;
-    int tailleCase = 15;
+    int tailleCase = 10;
     Vivant[][] simulation;
+    Timer fps;
+
+    boolean flip;
 
     public Grille(GraphicsConfiguration gc, Vivant[][] simulation) {
         super(gc);
         this.gc = gc;
         bords = gc.getBounds();
         this.simulation = simulation;
+        fps = new Timer(10, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                repaint();
+            }
+        });
+        //fps.start();
     }
 
     public void paint(Graphics g) {
+        if(buffer==null){
+            buffer = createImage(getSize().width, getSize().height);
+        }
+        if(buffer2==null){
+            buffer2 = createImage(getSize().width, getSize().height);
+        }
+        renderImage(buffer.getGraphics());
+        g.drawImage(buffer2, 0, 0,null);
+        renderImage(buffer2.getGraphics());
+        buffer2 = buffer;
+    }
+
+    public void renderImage(Graphics g) {
         for (int y = 0; y < taille + 1; y++) {
             for (int x = 0; x < taille + 1; x++) { //itère le tableau "simulation" dans ses 2 dimensiosn
                 if (x < taille && y < taille) {
@@ -34,8 +61,10 @@ public class Grille  extends Canvas {
     }
 
     public static void main(String[] args) {
+        lancerGrille(new Vivant[45][45]);
     }
-    public void lancerGrille(Vivant[][] simulation) {
+    public static Grille lancerGrille(Vivant[][] simulation) {
+        Grille derniere = null;
         GraphicsEnvironment ge =
                 GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice[] gs = ge.getScreenDevices();
@@ -48,18 +77,19 @@ public class Grille  extends Canvas {
                 System.out.println(i);
                 JFrame f =
                         new JFrame(gs[j].getDefaultConfiguration());
-                Grille c = new Grille(gc[i], new Vivant[45][45]);
+                derniere = new Grille(gc[i],simulation);
                 f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                 f.setLocationRelativeTo(null);
                 Rectangle gcBounds = gc[i].getBounds();
                 int xoffs = gcBounds.x;
                 int yoffs = gcBounds.y;
-                f.getContentPane().add(c);
+                f.getContentPane().add(derniere);
                 f.setTitle("Screen# " + Integer.toString(j) + ", GC# " + Integer.toString(i));
                 f.setSize(45*16, 45*16);
                 f.setLocation((i * 50) + xoffs, (i * 60) + yoffs);
                 f.setVisible(true);
             }
         }
+        return derniere;
     }
 }
