@@ -1,9 +1,6 @@
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,38 +8,22 @@ import java.nio.file.Paths;
 import java.util.Date;
 import java.util.Random;
 
-public class Plateau extends JPanel implements ActionListener {
+public class Plateau implements ActionListener {
     public Vivant[][] simulation;
     public static int tailleCase = 15;
     protected int taille;
 
-    protected int iterations = 0;
-    public Path dossier;
-    protected boolean capturerSimul = false;
     private Timer perfTimer = new Timer(1000, this);
     private int perfCompteur = 0;
 
-    public Timer fps;
     public Timer simulTimer;
-    Grille maGrille;
 
     public Plateau(int taille, Timer eventTimer) {
         super();
         this.taille = taille;
         simulTimer = eventTimer;
         genererPlateau(taille);
-        genererAlea(1,1, Graph.lancer());
         perfTimer.start();
-        //image = new BufferedImage((taille + 1) * tailleCase, (taille + 1) * tailleCase, BufferedImage.TYPE_USHORT_555_RGB);
-        fps = new Timer(16, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                //afficherPlateau();
-                repaint();
-            }
-        });
-        fps.start();
-       // maGrille = Grille.lancerGrille(simulation);
     }
 
     public void simuler() {
@@ -137,35 +118,6 @@ public class Plateau extends JPanel implements ActionListener {
         simulation = new Vivant[taille][taille];
     }
 
-    public void paint(Graphics g) {
-        if(iterations==0){
-            g.setColor(Color.black);
-            g.fillRect(0,0,getWidth(), getHeight());
-        }
-        for (int y = 0; y < taille + 1; y++) {
-            for (int x = 0; x < taille + 1; x++) { //itère le tableau "simulation" dans ses 2 dimensiosn
-                if (x < taille && y < taille) {
-                    Vivant ici = simulation[y][x];
-                    if (ici == null)
-                        g.setColor(Vivant.COULEUR);
-                    if (ici instanceof Lapin)
-                        g.setColor(Lapin.COULEUR);
-                    if(ici instanceof Potiron)
-                        g.setColor(Potiron.COULEUR);
-                    g.fillRect(((getWidth() - tailleCase*taille) / 2)+tailleCase * (x),
-                            ((getHeight() - tailleCase*taille) / 2)+tailleCase * (y),
-                            tailleCase-2,
-                            tailleCase-2);
-                    //ça effectue un produit en croix pour dessiner chaque case comme plusieurs pixels
-                }
-            }
-        }
-    }
-
-    public void zoom(int facteur) {
-        tailleCase = facteur;
-    }
-
     private void mouvementTest() { //fait un mouvement aléatoire
         Pos pos = Pos.getRandomPos(taille);
         while (Pos.getTab(simulation, pos) == null) { //on ne choisit pas une case vide
@@ -258,32 +210,6 @@ public class Plateau extends JPanel implements ActionListener {
             }
         }
         return n;
-    }
-
-    public void startCapture() {
-        capturerSimul = true;
-        if (iterations == 0) { //si on reprend la capture, pas besoin de recréer le dossier
-            try {
-                dossier = Files.createDirectories(Paths.get("simul-" + new Date().toString())); //crée
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void stopCapture() {
-        capturerSimul = false;
-    }
-
-    public void toggleCapture() {
-        if (capturerSimul)
-            stopCapture();
-        else
-            startCapture();
-    }
-
-    public void lancerFfmpeg() {
-        System.out.println("ffmpeg -r 60 -f image2 -s 500x500 -i \"" + dossier.toString() + "\"/%09d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p \"" + dossier.toString() + "\".mp4");
     }
 
     @Override

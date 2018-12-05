@@ -11,6 +11,7 @@ import java.net.URISyntaxException;
 public class Affichage extends JFrame implements ActionListener {
     public Timer monTimer;
     private Plateau plateau;
+    private Grille grille;
     private Graph graphique;
 
     private JMenuBar barreMenus = new JMenuBar();
@@ -41,7 +42,8 @@ public class Affichage extends JFrame implements ActionListener {
         setLocationRelativeTo(null);
         monTimer = new Timer(slideVitesse.getValue(),this);
         plateau = new Plateau(45, monTimer);
-        setContentPane(plateau);
+        grille = new Grille(plateau.simulation);
+        setContentPane(grille);
 
         boutonAction.addActionListener(this);
         boutonStart.addActionListener(this);
@@ -56,7 +58,7 @@ public class Affichage extends JFrame implements ActionListener {
         tailleCase.setToolTipText("Taille des cases");
         tailleCase.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
-                plateau.zoom(tailleCase.getValue());
+                grille.zoom(tailleCase.getValue());
             }
         });
         slideVitesse.addChangeListener(new ChangeListener() {
@@ -71,7 +73,7 @@ public class Affichage extends JFrame implements ActionListener {
             public void stateChanged(ChangeEvent e) {
                 float fps= (float) slideFPS.getValue();
                 float hz = 1/fps;
-                plateau.fps.setDelay((int) (1000*hz));
+                grille.fps.setDelay((int) (1000*hz));
                 textFPS.setText("Vitesse d'affichage (T="+hz+" s");
             }
         });
@@ -104,7 +106,6 @@ public class Affichage extends JFrame implements ActionListener {
         setJMenuBar(barreMenus);
 
         setVisible(true);
-        monTimer.start();
         new Thread(()->{
             try {
                 Thread.sleep(300);
@@ -151,8 +152,8 @@ public class Affichage extends JFrame implements ActionListener {
         if(e.getSource().equals(plusDeVivants)){plateau.genererAlea(200,10, graphique);}
         if(e.getSource().equals(moinsDeVivants)){plateau.supprAlea(100, graphique);}
 
-        if(e.getSource().equals(capturePix)){plateau.toggleCapture();}
-        if(e.getSource().equals(genVid)){plateau.lancerFfmpeg();}
+        /*if(e.getSource().equals(capturePix)){plateau.toggleCapture();}
+        if(e.getSource().equals(genVid)){plateau.lancerFfmpeg();}*/
 
         if(e.getSource().equals(vivantsTimer)){
             System.out.println("Choix de Vitesse de mort");
