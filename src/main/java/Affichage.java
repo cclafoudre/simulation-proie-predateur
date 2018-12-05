@@ -16,6 +16,7 @@ import java.net.URISyntaxException;
  */
 public class Affichage extends JFrame implements ActionListener {
     public Timer monTimer;
+    private Vivant[][] simulation = new Vivant[45][45];
     private Plateau plateau;
     private Grille grille;
     private Graph graphique;
@@ -49,8 +50,8 @@ public class Affichage extends JFrame implements ActionListener {
         setLocationRelativeTo(null);
         monTimer = new Timer(slideVitesse.getValue(),this);
 
-        plateau = new Plateau(45, monTimer);
-        grille = new Grille(plateau.simulation);
+        grille = new Grille(simulation);
+        plateau = new Plateau(monTimer, simulation, grille);
         plateau.setDisplay(grille);
 
         setContentPane(grille);
@@ -150,10 +151,8 @@ public class Affichage extends JFrame implements ActionListener {
             //System.out.println("On effectue un tour de simulation");
             //new Thread(()->{
             plateau.simuler();
-            int nbLap = plateau.getNbreLapins();
-            int nbPot = plateau.getNbrePotirons();
-            graphique.addLapins(  nbLap);
-            graphique.addPotirons(nbPot);
+            graphique.addLapins(  plateau.getNbreLapins());
+            graphique.addPotirons(plateau.getNbrePotirons());
             //}).start();
             //effectuer un tour
         }

@@ -23,17 +23,19 @@ public class Plateau implements ActionListener {
     public Timer simulTimer;
 
     /**
-     * Cr&eacute;e le tableau de la simulation.
-     * Il n'est pas encore pr&ecirc;t pour l'affichage, il faut lui assigner une {@link Grille}.
-     * @param taille nombre de cases en hauteur/largeur
+     * Remplit le tableau de simulation et se connecte &agrave; l'affichage.
+     * @param tableauVivants un tableau de {@link Vivant} &agrave; 2 dimensions qui repr&eacute;sente l'&eacute;tat de la simulation.
+     *                       On lui passe la r&eacute;f&eacute;rence car il faut ce tableau pour initialiser {@link Grille}
+     * @param affichage une {@link Grille}
      * @param eventTimer le timer des tours de simulation.
      */
-    public Plateau(int taille, Timer eventTimer) {
+    public Plateau(Timer eventTimer, Vivant[][] tableauVivants, Grille affichage) {
         super();
-        this.taille = taille;
+        this.taille = tableauVivants.length;
         simulTimer = eventTimer;
-        genererPlateau(taille);
         perfTimer.start();
+        simulation = tableauVivants;
+        display=affichage;
     }
 
     /**
@@ -143,9 +145,6 @@ public class Plateau implements ActionListener {
         return Pos.getTab(simulation, pos) == null;
     }
 
-    public void genererPlateau(int taille) {
-        simulation = new Vivant[taille][taille];
-    }
 
     private void mouvementTest() { //fait un mouvement aléatoire
         Pos pos = Pos.getRandomPos(taille);

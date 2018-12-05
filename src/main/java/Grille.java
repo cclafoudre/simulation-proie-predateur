@@ -18,6 +18,7 @@ public class Grille  extends JPanel implements Runnable{
      */
     public Grille(Vivant[][] simulation) {
         this.simulation = simulation;
+        this.taille = simulation.length;
         fps = new Timer(10, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
