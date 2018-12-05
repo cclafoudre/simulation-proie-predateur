@@ -4,6 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 
+/**
+ * Fen&ecirc;tre affichant une courbe de l'&eacute;volution des potions/lapins en fonction du temps.
+ */
 public class Graph extends JPanel implements ActionListener {
     protected BufferedImage image;
     //public int[] serieDonnee;
@@ -22,9 +25,13 @@ public class Graph extends JPanel implements ActionListener {
         serieLapins = new int[longeur];
         seriePotirons = new int[longeur];
         image = new BufferedImage(timeWindow*zoomX, 700,BufferedImage.TYPE_USHORT_555_RGB);
-        new Timer(50, this).start();
+        new Timer(32, this).start();
     }
 
+    /**
+     * Rajoute une valeur de recensement des lapins dans l'historique &agrave; l'&eacute;cran.
+     * @param valeur le nombre de lapins
+     */
     public void addLapins(int valeur) {
         new Thread(()->{
             if(indexLapins<longeur-1){
@@ -47,6 +54,10 @@ public class Graph extends JPanel implements ActionListener {
             }
         }).start();
     }
+    /**
+     * Rajoute une valeur de recensement des potirons dans l'historique &agrave; l'&eacute;cran.
+     * @param valeur le nombre de potirons
+     */
     public void addPotirons(int valeur) {
         new Thread(()->{
             if(indexPotirons<longeur-1){
@@ -78,6 +89,9 @@ public class Graph extends JPanel implements ActionListener {
     }catch (ArrayIndexOutOfBoundsException e){}
     }
 
+    /**
+     * Remet &agrave; z&eacute;ro le graphique pour effacer les pixels erron&eacute;s qui apparaissent de temps en temps.
+     */
     public void clean() {
         image.flush();
         image=null;
@@ -86,7 +100,7 @@ public class Graph extends JPanel implements ActionListener {
         indexPotirons=0;
     }
 
-    public void decaler(int n) {
+    private void decaler(int n) {
         /*int[] nouveau = new int[longeur];
         for (int i = nouveau.length - 1; i > n; i -= 1) {
             nouveau[i - n] = serieDonnee[i];
@@ -109,11 +123,22 @@ public class Graph extends JPanel implements ActionListener {
                     null);
         }
     }
+
+    /**
+     * M&eacute;thode appel&eacute;e lors du redimensionnement de la fen&ecirc;tre. Sert &agrave; V&eacute;rifier que le graph
+     * est bien affich&eacute; au milieu.
+     * @param largeur
+     * @param hauteur
+     */
     public void resize(int largeur, int hauteur){
         longeur = largeur;
         image = new BufferedImage(longeur*zoomX, hauteur,BufferedImage.TYPE_INT_RGB);
     }
 
+    /**
+     * Cr&eacute;e une nouvelle fen&ecirc;tre avec la courbe dedans.
+     * @return le graphique cr&eacute;e
+     */
     public static Graph lancer() {
         JFrame window = new JFrame("Graph");
         Graph g = new Graph(900);

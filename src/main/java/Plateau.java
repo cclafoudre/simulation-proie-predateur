@@ -8,6 +8,10 @@ import java.nio.file.Paths;
 import java.util.Date;
 import java.util.Random;
 
+/**
+ * Contient toute la logique et les m&eacute;thodes pratiques pour g&eacute;rer les r&egrave;gles de la simulation.
+ * N&eacute;cessite un objet {@link Grille} pour l'affichage, &agrave; d&eacute;finir avec {@link Plateau#setDisplay(Grille)} car les deux classes ont des d&eacute;pendances mutuelles.
+ */
 public class Plateau implements ActionListener {
     public Vivant[][] simulation;
     public static int tailleCase = 15;
@@ -15,9 +19,15 @@ public class Plateau implements ActionListener {
 
     private Timer perfTimer = new Timer(1000, this);
     private int perfCompteur = 0;
-
+    public Grille display;
     public Timer simulTimer;
 
+    /**
+     * Cr&eacute;e le tableau de la simulation.
+     * Il n'est pas encore pr&ecirc;t pour l'affichage, il faut lui assigner une {@link Grille}.
+     * @param taille nombre de cases en hauteur/largeur
+     * @param eventTimer le timer des tours de simulation.
+     */
     public Plateau(int taille, Timer eventTimer) {
         super();
         this.taille = taille;
@@ -26,18 +36,20 @@ public class Plateau implements ActionListener {
         perfTimer.start();
     }
 
+    /**
+     * D&eacute;finit l'affiche &agrave; mettre &agrave; jour lors des tours de simulation. Il n'y a que les cases modifi&eacute;es qui changeront.
+     * @param display un objet Grille d&eacute;j&agrave; initialis&eacute;
+     */
+    public void setDisplay(Grille display) {
+        this.display = display;
+        display.fps.stop();
+    }
+
     public void simuler() {
         //mouvementTest();
-        new Thread(()->{
         menageDesMorts(); //supprimme les vivants qui n'ont plus de points de vie
         mangerBouger(); //action principale
         perfCompteur +=1;
-        }).start();
-        new Thread(()->{
-            menageDesMorts(); //supprimme les vivants qui n'ont plus de points de vie
-            mangerBouger(); //action principale
-            perfCompteur +=1;
-        }).start();
     }
 
     /**
@@ -90,12 +102,23 @@ public class Plateau implements ActionListener {
         }*/
     }
 
+    /**
+     * @param nouveau le Vivant &agrave; ins&eacute;rer
+     * @param pos la position o&ugrave; le mettre
+     */
     public void ajouterVivant(Vivant nouveau, Pos pos) {
         Pos.setTab(simulation, pos, nouveau);
         nouveau.setPos(pos);
+        display.dessineCase(pos,nouveau);
     }
 
+    /**
+     * Enl&egrave;ve un vivant de la simulation.
+     * @param aSuppr le vivant &agrave; tuer
+     * @return l'argument d'entr&eacute;e
+     */
     public Vivant enleverVivant(Vivant aSuppr) {
+        display.dessineCase(aSuppr.getPos(),null);
         Pos.delTab(simulation, aSuppr.getPos());
         return aSuppr;
     }
@@ -103,9 +126,15 @@ public class Plateau implements ActionListener {
     public Vivant enleverVivant(Pos pos) {
         Vivant suppr = selectVivant(pos);
         Pos.delTab(simulation, pos);
+        display.dessineCase(pos,null);
         return suppr;
     }
 
+    /**
+     *
+     * @param pos une position
+     * @return Le vivant &agrave; la position demand&eacute;e, peut &ecirc;tre "null"
+     */
     public Vivant selectVivant(Pos pos) {
         return (Vivant) Pos.getTab(simulation, pos);
     }
@@ -218,7 +247,7 @@ public class Plateau implements ActionListener {
         perfCompteur =0;
     }
 
-    public Pos getRandomVivant() {
+    private Pos getRandomVivant() {
         Pos pos = Pos.getRandomPos(taille);
         while (Pos.getTab(simulation, pos) == null) {
             pos = Pos.getRandomPos(taille);
@@ -226,7 +255,7 @@ public class Plateau implements ActionListener {
         return pos;
     }
 
-    public Pos getRandomVide(){
+    private Pos getRandomVide(){
         Pos pos = Pos.getRandomPos(taille);
         while (Pos.getTab(simulation, pos) != null) {
             pos = Pos.getRandomPos(taille);
@@ -234,13 +263,15 @@ public class Plateau implements ActionListener {
         return pos;
     }
 
-    public void menageDesMorts() {
+    private void menageDesMorts() {
         int nbVivants=0;
         for (int y = 0; y < taille; y++) { //parcourt tout le tableau pour supprimmer
             for (int x = 0; x < taille; x++) { // les vivants qui n'ont plus de PV
                 if(simulation[y][x]!=null) {
-                    if (!simulation[y][x].visible())
+                    if (!simulation[y][x].visible()) {
                         simulation[y][x] = null;
+                        display.dessineCase(x,y,null);
+                    }
                     else
                         nbVivants+=1;
                 }
@@ -252,7 +283,11 @@ public class Plateau implements ActionListener {
         }
     }
 
-    public void setMortDelay(int ms){ //itère tout le tableau des vivants pour leur changer leur délai de vérification de mort
+    /**
+     * it&egrave;re tout le tableau des vivants pour leur changer leur d&eacute;lai de v&eacute;rification de mort
+     * @param ms l'esp&eacute;rance de vie en milisecondes.
+     */
+    public void setMortDelay(int ms){
         for (int y = 0; y < taille; y++) {
             for (int x = 0; x < taille; x++) {
                 if(simulation[y][x]!=null)

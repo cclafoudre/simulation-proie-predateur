@@ -1,13 +1,16 @@
+import com.sun.istack.internal.Nullable;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+/**
+ * Repr&eacute;sente un &ecirc;tre vivant : {@link Potiron potiron} ou {@link Lapin lapin}.
+ * Ils ont une dur&eacute;e de vie variable et meurent au bout d'un certain temps. une boucle se charge de les supprimmer lorsqu'ils meurent.
+ * La variable {@link Vivant#SIMULATION_ACTIVE} active ou d&eacute;sactive le d&eacute;compte de leur esp&eacute;rance de vie.
+ */
 public class Vivant implements ActionListener {
-    //public Vivant auDessus;
-    //public Vivant enDessous;
-    //public Vivant aDroite;
-    //public Vivant aGauche;
     public int x;
     public int y;
     public Pos position;
@@ -47,8 +50,8 @@ public class Vivant implements ActionListener {
     public Color getCouleur() {return COULEUR;}
 
     /**
-     * Détermine si le Vivant devra être affiché et éventuellement supprimmé le cas échéant
-     * @return true s'il doit être affiché
+     * D&eacute;termine si le Vivant devra &ecirc;tre affich&eacute; et &eacute;ventuellement supprimm&eacute; le cas &eacute;ch&eacute;ant
+     * @return true s'il doit &ecirc;tre affich&eacute;
      */
     public boolean visible() {
         return pointsDeVie > 0;
@@ -72,7 +75,10 @@ public class Vivant implements ActionListener {
         timer.stop();
     }
 
-    public void vivre(ActionEvent e){
+    /**
+     * &Agrave; ex&eacute;cuter lors d'un tour de simulation, &ccedil;a fait perdre des PV.
+     */
+    protected void vivre(@Nullable ActionEvent e){
         pointsDeVie-=1;
     }
 }

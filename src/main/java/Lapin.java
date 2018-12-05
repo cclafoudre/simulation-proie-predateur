@@ -2,9 +2,13 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 
 /**
- * Il peut se déplacer
+ * Un objet repr&eacute;sentant un Lapin, qui peut se d&eacute;placer et manger les potions.
+ * &Agrave; chaque fois qu'il mange, ses points de vie remontent au maximum, rallongeant son esp&eacute;rance de vie.
  */
 public class Lapin extends Vivant{
+    /**
+     * Lorsque le lapin n'a plus de points de nutrition, il commence &agrave; perdre des points de vie.
+     */
     public int pointsDeNutrition;
     public static final Color COULEUR= new Color(255, 255, 255);
     public static int PV_INITIAL=5;
@@ -22,6 +26,9 @@ public class Lapin extends Vivant{
             pointsDeNutrition+=1;
     }
 
+    /**
+     * Un tour de simulation pass&eacute; sans que la lapin mange, il pert donc un PV.
+     */
     public void jourSansManger(){
         pointsDeNutrition-=1;
     }
@@ -30,7 +37,7 @@ public class Lapin extends Vivant{
     }
 
     @Override
-    public void vivre(ActionEvent e){
+    protected void vivre(ActionEvent e){
         if(pointsDeNutrition<=0)
             super.vivre(e);
         else

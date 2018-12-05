@@ -8,6 +8,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+/**
+ * Classe pour lancer le programme. Il y a dedans tous les contr&ocirc;les, et c'est elle qui poss&egrave;de et g&egrave;re les objets
+ * {@link Grille} (affichage du plateau de simulation),
+ * {@link Graph} (affiche l'&eacute;volution dans le temps des populations)
+ * et {@link Plateau} (logique m&eacute;tier des tours de simulation, n'effectue aucun affichage)
+ */
 public class Affichage extends JFrame implements ActionListener {
     public Timer monTimer;
     private Plateau plateau;
@@ -32,6 +38,7 @@ public class Affichage extends JFrame implements ActionListener {
     private JCheckBoxMenuItem capturePix = new JCheckBoxMenuItem("Enregistrer la simulation");
 
     private JMenuItem textFPS = new JMenuItem("Vitesse d'affichage: T(s)");
+    private JCheckBoxMenuItem singleRefresh = new JCheckBoxMenuItem("Rafraîchir tout le plateau");
     private JSlider slideFPS = new JSlider(1,60,30);
 
     public Affichage(){
@@ -41,8 +48,11 @@ public class Affichage extends JFrame implements ActionListener {
         setTitle("Simluation Proie-prédateur");
         setLocationRelativeTo(null);
         monTimer = new Timer(slideVitesse.getValue(),this);
+
         plateau = new Plateau(45, monTimer);
         grille = new Grille(plateau.simulation);
+        plateau.setDisplay(grille);
+
         setContentPane(grille);
 
         boutonAction.addActionListener(this);
@@ -77,12 +87,14 @@ public class Affichage extends JFrame implements ActionListener {
                 textFPS.setText("Vitesse d'affichage (T="+hz+" s");
             }
         });
+        singleRefresh.addActionListener(this);
         parametres.add(infoZoom);
         parametres.add(tailleCase);
         parametres.add(capturePix);
         parametres.add(new JSeparator());
         parametres.add(textFPS);
         parametres.add(slideFPS);
+        parametres.add(singleRefresh);
         parametres.add(new JSeparator());
         JMenuItem a1 = new JMenuItem("Délai de simulation");
         a1.setEnabled(false);
@@ -95,14 +107,16 @@ public class Affichage extends JFrame implements ActionListener {
         barreMenus.add(parametres);
 
         actions.add(boutonAction);
-        actions.add(boutonStart);
-        actions.add(boutonStop);
+        /*actions.add(boutonStart);
+        actions.add(boutonStop);*/
         actions.add(new JSeparator());
         actions.add(plusDeVivants);
         actions.add(moinsDeVivants);
         actions.add(new JSeparator());
         actions.add(genVid);
         barreMenus.add(actions);
+        barreMenus.add(boutonStart);
+        barreMenus.add(boutonStop);
         setJMenuBar(barreMenus);
 
         setVisible(true);
@@ -154,7 +168,14 @@ public class Affichage extends JFrame implements ActionListener {
 
         /*if(e.getSource().equals(capturePix)){plateau.toggleCapture();}
         if(e.getSource().equals(genVid)){plateau.lancerFfmpeg();}*/
-
+        if(e.getSource().equals(singleRefresh)){
+            if(!singleRefresh.getState()){
+                plateau.setDisplay(grille);
+                grille.stopRefresh();
+            }else {
+                grille.startRefresh();
+            }
+        }
         if(e.getSource().equals(vivantsTimer)){
             System.out.println("Choix de Vitesse de mort");
             String reponse = JOptionPane.showInputDialog(
