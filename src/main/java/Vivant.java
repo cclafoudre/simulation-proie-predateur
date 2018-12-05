@@ -12,7 +12,7 @@ public class Vivant implements ActionListener {
     public int y;
     public Pos position;
 
-    public static Color COULEUR = new Color(64, 123, 67);
+    public static final Color COULEUR = new Color(64, 123, 67);
     public static int DELAI_TIMER=7000;
     public static boolean SIMULATION_ACTIVE; //active/désactive la mort des vivants
     public int pointsDeVie = 0;

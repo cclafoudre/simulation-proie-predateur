@@ -2,16 +2,19 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferStrategy;
 
-public class Grille  extends Canvas {
+public class Grille  extends Canvas implements Runnable{
     GraphicsConfiguration gc;
     Rectangle bords;
-    Image buffer;
-    Image buffer2;
     int taille = 45;
     int tailleCase = 10;
     Vivant[][] simulation;
     Timer fps;
+
+    BufferStrategy doubleBuffering;
+    AffineTransform monZoom;
 
     boolean flip;
 
@@ -23,23 +26,51 @@ public class Grille  extends Canvas {
         fps = new Timer(10, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                repaint();
+                run();
+                //repaint();
             }
         });
-        //fps.start();
+        fps.start();
     }
 
     public void paint(Graphics g) {
-        if(buffer==null){
-            buffer = createImage(getSize().width, getSize().height);
+        renderImage(g);
+    }
+
+    public void displayImage() {
+        if(doubleBuffering==null){
+            this.createBufferStrategy(1);
+            doubleBuffering = getBufferStrategy();
+            //prépare une transormation 2x
+            monZoom = ((Graphics2D)doubleBuffering.getDrawGraphics()).getTransform();
+            monZoom.setToScale(3,3);
         }
-        if(buffer2==null){
-            buffer2 = createImage(getSize().width, getSize().height);
-        }
-        renderImage(buffer.getGraphics());
-        g.drawImage(buffer2, 0, 0,null);
-        renderImage(buffer2.getGraphics());
-        buffer2 = buffer;
+        do {
+            // The following loop ensures that the contents of the drawing buffer
+            // are consistent in case the underlying surface was recreated
+            do {
+                // Get a new graphics context every time through the loop
+                // to make sure the strategy is validated
+                Graphics g = doubleBuffering.getDrawGraphics();
+                // Render to graphics
+
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setTransform(monZoom);
+                renderImage(g2d);
+
+                // Dispose the graphics
+                g.dispose();
+                g2d.dispose();
+
+                // Repeat the rendering if the drawing buffer contents
+                // were restored
+            } while (doubleBuffering.contentsRestored());
+
+            // Display the buffer
+            //doubleBuffering.show();
+
+            // Repeat the rendering if the drawing buffer was lost
+        } while (doubleBuffering.contentsLost());
     }
 
     public void renderImage(Graphics g) {
@@ -91,5 +122,10 @@ public class Grille  extends Canvas {
             }
         }
         return derniere;
+    }
+
+    @Override
+    public void run() {
+        displayImage();
     }
 }

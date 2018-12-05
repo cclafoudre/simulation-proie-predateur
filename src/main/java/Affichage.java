@@ -13,7 +13,6 @@ public class Affichage extends JFrame implements ActionListener {
     private Plateau plateau;
     private Graph graphique;
 
-    private JPanel zoneAffichage = new JPanel(new BorderLayout());
     private JMenuBar barreMenus = new JMenuBar();
     private JMenu actions = new JMenu("Actions");
     private JMenuItem boutonAction = new JMenuItem("Simuler un tour");
@@ -42,7 +41,7 @@ public class Affichage extends JFrame implements ActionListener {
         setLocationRelativeTo(null);
         monTimer = new Timer(slideVitesse.getValue(),this);
         plateau = new Plateau(45, monTimer);
-        zoneAffichage.add(plateau);
+        setContentPane(plateau);
 
         boutonAction.addActionListener(this);
         boutonStart.addActionListener(this);
@@ -104,9 +103,7 @@ public class Affichage extends JFrame implements ActionListener {
         barreMenus.add(actions);
         setJMenuBar(barreMenus);
 
-        add(zoneAffichage, BorderLayout.CENTER);
         setVisible(true);
-        plateau.afficherPlateau();
         monTimer.start();
         new Thread(()->{
             try {

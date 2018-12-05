@@ -3,8 +3,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.Ellipse2D;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,7 +12,6 @@ import java.util.Date;
 import java.util.Random;
 
 public class Plateau extends JPanel implements ActionListener {
-    protected BufferedImage image;
     public Vivant[][] simulation;
     public static int tailleCase = 15;
     protected int taille;
@@ -36,30 +33,30 @@ public class Plateau extends JPanel implements ActionListener {
         genererPlateau(taille);
         genererAlea(1,1, Graph.lancer());
         perfTimer.start();
-        image = new BufferedImage((taille + 1) * tailleCase, (taille + 1) * tailleCase, BufferedImage.TYPE_USHORT_555_RGB);
+        //image = new BufferedImage((taille + 1) * tailleCase, (taille + 1) * tailleCase, BufferedImage.TYPE_USHORT_555_RGB);
         fps = new Timer(16, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                afficherPlateau();
-                maGrille.repaint();
+                //afficherPlateau();
+                repaint();
             }
         });
         fps.start();
-        maGrille = Grille.lancerGrille(simulation);
+       // maGrille = Grille.lancerGrille(simulation);
     }
 
     public void simuler() {
-        /*Graphics2D g2d = image.createGraphics();
-        g2d.setColor(Color.red);
-        g2d.fill(new Ellipse2D.Float(0, 0, 7, 7));
-        g2d.dispose(); //ça trace un point rouge en haut pour savoir si la simulation tourne, et à quelle vitesse
-        repaint();*/
-
         //mouvementTest();
+        new Thread(()->{
         menageDesMorts(); //supprimme les vivants qui n'ont plus de points de vie
         mangerBouger(); //action principale
         perfCompteur +=1;
-
+        }).start();
+        new Thread(()->{
+            menageDesMorts(); //supprimme les vivants qui n'ont plus de points de vie
+            mangerBouger(); //action principale
+            perfCompteur +=1;
+        }).start();
     }
 
     /**
@@ -74,7 +71,6 @@ public class Plateau extends JPanel implements ActionListener {
     }
 
     private void deplacement(Pos initial) {
-        //Pos initial = getRandomVivant();
         int dx= new Random().nextInt(3)-1; //on bouge d'une case dans une direction au hazard (& en diagoanel)
         int dy= new Random().nextInt(3)-1;
         Pos destination = new Pos(initial.getX()+dx, initial.getY()+dy);
@@ -141,68 +137,33 @@ public class Plateau extends JPanel implements ActionListener {
         simulation = new Vivant[taille][taille];
     }
 
-    public void afficherPlateau() {
+    public void paint(Graphics g) {
+        if(iterations==0){
+            g.setColor(Color.black);
+            g.fillRect(0,0,getWidth(), getHeight());
+        }
         for (int y = 0; y < taille + 1; y++) {
             for (int x = 0; x < taille + 1; x++) { //itère le tableau "simulation" dans ses 2 dimensiosn
-                if (x < taille && y < taille)
-                    afficherCase(simulation[y][x], tailleCase * (x + 1), tailleCase * (y + 1)); //décalage d'indice pour ne pas dessiner les pixels en dehors
-                //ça effectue un produit en croix pour dessiner chaque case comme plusieurs pixels
-            }
-        }
-        repaint();
-        /*Graphics2D g2d = image.createGraphics();
-        g2d.setColor(Color.BLACK);
-        g2d.fill(new Ellipse2D.Float(0, 0, 7, 7));
-        g2d.dispose();
-        repaint();*/
-        if (!capturerSimul) //si on ne demande pas de capturer, les images, le code s'arrête ici
-            return;
-        iterations += 1;
-        try {
-            String chemin = dossier.toString() + File.separator + String.format("%09d", iterations) + ".png"; //sauvegarde les fichiers avec 9 zéros
-            ImageIO.write(image, "png", new File(chemin));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void afficherCase(Vivant vivant, int x, int y) {
-        for (int j = -tailleCase / 2 + 1; j < tailleCase / 2 - 1; j++) {
-            for (int i = -tailleCase / 2 + 1; i < tailleCase / 2 - 1; i++) { //itère autour du pixel central
-                int X = x + i;
-                int Y = y + j;
-                try {
-                    if (vivant != null && vivant.visible())
-                        image.setRGB(X, Y, vivant.getCouleur().getRGB());
-                    else
-                        image.setRGB(X, Y, Vivant.COULEUR.getRGB());
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    System.out.println("x=" + x + " y=" + y);
-                    System.out.println("x+i=" + x + i + " y+j=" + y + j);
-                    e.printStackTrace();
-                } catch (NullPointerException e) { //il n'y a rien dans cette case
-                    System.out.println("Il n'y a rien dans cette case !");
-                    image.setRGB(X, Y, Vivant.COULEUR.getRGB());
+                if (x < taille && y < taille) {
+                    Vivant ici = simulation[y][x];
+                    if (ici == null)
+                        g.setColor(Vivant.COULEUR);
+                    if (ici instanceof Lapin)
+                        g.setColor(Lapin.COULEUR);
+                    if(ici instanceof Potiron)
+                        g.setColor(Potiron.COULEUR);
+                    g.fillRect(((getWidth() - tailleCase*taille) / 2)+tailleCase * (x),
+                            ((getHeight() - tailleCase*taille) / 2)+tailleCase * (y),
+                            tailleCase-2,
+                            tailleCase-2);
+                    //ça effectue un produit en croix pour dessiner chaque case comme plusieurs pixels
                 }
             }
         }
     }
 
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        if (image != null) {
-            g.drawImage(image, //dessine l'image au milieu de la fenetre
-                    (getWidth() - image.getWidth()) / 2,
-                    (getHeight() - image.getHeight()) / 2,
-                    null);
-        }
-    }
-
     public void zoom(int facteur) {
-        //fps.stop();
         tailleCase = facteur;
-        image = new BufferedImage((taille + 1) * tailleCase, (taille + 1) * tailleCase, BufferedImage.TYPE_USHORT_555_RGB);
-        //fps.start();
     }
 
     private void mouvementTest() { //fait un mouvement aléatoire
@@ -240,7 +201,6 @@ public class Plateau extends JPanel implements ActionListener {
             Pos pos = Pos.getRandomPos(taille);
             if (Pos.getTab(simulation, pos) == null) {
                 ajouterVivant(new Potiron(), pos);
-                //graph.addLapins(getNbreLapins());
                 graph.addPotirons(getNbrePotirons());
                 nP[0] += 1;
             }
@@ -250,7 +210,6 @@ public class Plateau extends JPanel implements ActionListener {
             if (Pos.getTab(simulation, pos) == null) {
                 ajouterVivant(new Lapin(), pos);
                 graph.addLapins(getNbreLapins());
-                //graph.addPotirons(getNbrePotirons());
                 nL[0] += 1;
             }
         }

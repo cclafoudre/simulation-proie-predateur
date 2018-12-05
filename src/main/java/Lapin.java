@@ -6,7 +6,7 @@ import java.awt.event.ActionEvent;
  */
 public class Lapin extends Vivant{
     public int pointsDeNutrition;
-    public static Color COULEUR= new Color(255, 255, 255);
+    public static final Color COULEUR= new Color(255, 255, 255);
     public static int PV_INITIAL=5;
 
     public Lapin(){
