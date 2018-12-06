@@ -10,8 +10,8 @@ import java.awt.event.ActionListener;
 public class Grille  extends JPanel implements Runnable{
     int taille = 45;
     int tailleCase = 10;
-    Vivant[][] simulation;
-    Timer fps;
+    private Vivant[][] simulation;
+    private Timer fps;
 
     /**
      * @param simulation la r&eacute;f&eacute;rence d'un tableau de vivants
@@ -76,6 +76,8 @@ public class Grille  extends JPanel implements Runnable{
      * @param ici le Vivant &agrave; afficher. peut &ecirc;tre "null" (case vide)
      */
     public void dessineCase(int x, int y, Vivant ici) {
+        if(isSingleRefresh())
+            return;
         dessineCase(x,y,ici,getGraphics());
     }
 
@@ -95,5 +97,15 @@ public class Grille  extends JPanel implements Runnable{
     }
     public void startRefresh() {
         this.fps.start();
+    }
+    public void setRefreshDelay(int ms){this.fps.setDelay(ms);}
+
+    private boolean isSingleRefresh(){return fps.isRunning();}
+
+    public void afficherTexte(String str){
+        Graphics g = getGraphics();
+        g.fillRect(0,0,50,20);
+        g.setColor(Color.red);
+        g.drawString(str,5,10);
     }
 }

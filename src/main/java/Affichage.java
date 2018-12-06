@@ -1,7 +1,6 @@
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -15,7 +14,6 @@ import java.net.URISyntaxException;
  * et {@link Plateau} (logique m&eacute;tier des tours de simulation, n'effectue aucun affichage)
  */
 public class Affichage extends JFrame implements ActionListener {
-    public Timer monTimer;
     private Vivant[][] simulation = new Vivant[45][45];
     private Plateau plateau;
     private Grille grille;
@@ -33,7 +31,7 @@ public class Affichage extends JFrame implements ActionListener {
     private JMenu parametres = new JMenu("Paramètres");
     private JMenuItem infoZoom = new JMenuItem("Zoom");
     private JSlider tailleCase = new JSlider(4,50,Plateau.tailleCase);
-    private JMenuItem vivantsTimer = new JMenuItem("CHanger le délai de mort");
+    private JMenuItem vivantsTimer = new JMenuItem("Changer le délai de mort");
     private JSlider slideVitesse = new JSlider(1,100,50);
     private JMenuItem cleanGraph = new JMenuItem("Remise à zéro du graphique");
     private JCheckBoxMenuItem capturePix = new JCheckBoxMenuItem("Enregistrer la simulation");
@@ -48,10 +46,10 @@ public class Affichage extends JFrame implements ActionListener {
         setSize(800,850);
         setTitle("Simluation Proie-prédateur");
         setLocationRelativeTo(null);
-        monTimer = new Timer(slideVitesse.getValue(),this);
 
         grille = new Grille(simulation);
-        plateau = new Plateau(monTimer, simulation, grille);
+        graphique = Graph.lancer();
+        plateau = new Plateau(simulation, grille, graphique);
         plateau.setDisplay(grille);
 
         setContentPane(grille);
@@ -74,7 +72,7 @@ public class Affichage extends JFrame implements ActionListener {
         });
         slideVitesse.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
-                monTimer.setDelay(slideVitesse.getValue());
+                plateau.setSimulationDelay(slideVitesse.getValue());
             }
         });
         infoZoom.setEnabled(false);
@@ -84,7 +82,7 @@ public class Affichage extends JFrame implements ActionListener {
             public void stateChanged(ChangeEvent e) {
                 float fps= (float) slideFPS.getValue();
                 float hz = 1/fps;
-                grille.fps.setDelay((int) (1000*hz));
+                grille.setRefreshDelay((int) (1000*hz));
                 textFPS.setText("Vitesse d'affichage (T="+hz+" s");
             }
         });
@@ -108,8 +106,8 @@ public class Affichage extends JFrame implements ActionListener {
         barreMenus.add(parametres);
 
         actions.add(boutonAction);
-        /*actions.add(boutonStart);
-        actions.add(boutonStop);*/
+        actions.add(boutonStart);
+        actions.add(boutonStop);
         actions.add(new JSeparator());
         actions.add(plusDeVivants);
         actions.add(moinsDeVivants);
@@ -129,7 +127,6 @@ public class Affichage extends JFrame implements ActionListener {
             }
             plateau.genererAlea(1000,50, graphique);
         }).start();
-        graphique = Graph.lancer();
         JOptionPane.showMessageDialog(null,new JLabel("Veuillez lancer la simulation depuis le menu Actions"),"Task failed successfully !",JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -147,20 +144,18 @@ public class Affichage extends JFrame implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource().equals(monTimer) || e.getSource().equals(boutonAction)) {
+        if (e.getSource().equals(boutonAction)) {
             //System.out.println("On effectue un tour de simulation");
             //new Thread(()->{
             plateau.simuler();
-            graphique.addLapins(  plateau.getNbreLapins());
-            graphique.addPotirons(plateau.getNbrePotirons());
             //}).start();
             //effectuer un tour
         }
         if(e.getSource().equals(cleanGraph)){graphique.clean();}
 
 
-        if(e.getSource().equals(boutonStart)){monTimer.start();Vivant.SIMULATION_ACTIVE=true;}
-        if(e.getSource().equals(boutonStop)){monTimer.stop();Vivant.SIMULATION_ACTIVE=false;}
+        if(e.getSource().equals(boutonStart)){plateau.startSimulation();}
+        if(e.getSource().equals(boutonStop)){plateau.stopSimulation();}
 
         if(e.getSource().equals(plusDeVivants)){plateau.genererAlea(200,10, graphique);}
         if(e.getSource().equals(moinsDeVivants)){plateau.supprAlea(100, graphique);}
@@ -169,7 +164,7 @@ public class Affichage extends JFrame implements ActionListener {
         if(e.getSource().equals(genVid)){plateau.lancerFfmpeg();}*/
         if(e.getSource().equals(singleRefresh)){
             if(!singleRefresh.getState()){
-                plateau.setDisplay(grille);
+                //plateau.setDisplay(grille);
                 grille.stopRefresh();
             }else {
                 grille.startRefresh();

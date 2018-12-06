@@ -8,7 +8,7 @@ import java.awt.event.ActionListener;
 /**
  * Repr&eacute;sente un &ecirc;tre vivant : {@link Potiron potiron} ou {@link Lapin lapin}.
  * Ils ont une dur&eacute;e de vie variable et meurent au bout d'un certain temps. une boucle se charge de les supprimmer lorsqu'ils meurent.
- * La variable {@link Vivant#SIMULATION_ACTIVE} active ou d&eacute;sactive le d&eacute;compte de leur esp&eacute;rance de vie.
+ * La variable {@link Plateau#SIMULATION_ACTIVE} active ou d&eacute;sactive le d&eacute;compte de leur esp&eacute;rance de vie.
  */
 public class Vivant implements ActionListener {
     public int x;
@@ -17,7 +17,6 @@ public class Vivant implements ActionListener {
 
     public static final Color COULEUR = new Color(64, 123, 67);
     public static int DELAI_TIMER=7000;
-    public static boolean SIMULATION_ACTIVE; //active/désactive la mort des vivants
     public int pointsDeVie = 0;
 
     public Timer timer;
@@ -59,8 +58,8 @@ public class Vivant implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(SIMULATION_ACTIVE)
-            vivre(e);
+        if(Plateau.SIMULATION_ACTIVE)
+            vivre();
     }
 
     public void setDelay(int ms){
@@ -78,7 +77,7 @@ public class Vivant implements ActionListener {
     /**
      * &Agrave; ex&eacute;cuter lors d'un tour de simulation, &ccedil;a fait perdre des PV.
      */
-    protected void vivre(@Nullable ActionEvent e){
+    protected void vivre(){
         pointsDeVie-=1;
     }
 }

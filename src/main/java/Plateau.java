@@ -11,31 +11,34 @@ import java.util.Random;
 /**
  * Contient toute la logique et les m&eacute;thodes pratiques pour g&eacute;rer les r&egrave;gles de la simulation.
  * N&eacute;cessite un objet {@link Grille} pour l'affichage, &agrave; d&eacute;finir avec {@link Plateau#setDisplay(Grille)} car les deux classes ont des d&eacute;pendances mutuelles.
+ * L'attribut {@link Plateau#SIMULATION_ACTIVE} permet d'arr&ecirc;ter les boucles "while" encore en cours lors de l'arr&ecirc;t de la simulation, par exempe quand il n'y a plus de vivants
  */
-public class Plateau implements ActionListener {
+public class Plateau extends Thread implements ActionListener{
+    public static boolean SIMULATION_ACTIVE;
     public Vivant[][] simulation;
     public static int tailleCase = 15;
-    protected int taille;
+    private int taille;
 
     private Timer perfTimer = new Timer(1000, this);
     private int perfCompteur = 0;
-    public Grille display;
-    public Timer simulTimer;
+    private Grille display;
+    private Graph graph;
+    private Timer simulTimer;
 
     /**
      * Remplit le tableau de simulation et se connecte &agrave; l'affichage.
      * @param tableauVivants un tableau de {@link Vivant} &agrave; 2 dimensions qui repr&eacute;sente l'&eacute;tat de la simulation.
      *                       On lui passe la r&eacute;f&eacute;rence car il faut ce tableau pour initialiser {@link Grille}
      * @param affichage une {@link Grille}
-     * @param eventTimer le timer des tours de simulation.
      */
-    public Plateau(Timer eventTimer, Vivant[][] tableauVivants, Grille affichage) {
+    public Plateau(Vivant[][] tableauVivants, Grille affichage, Graph graph) {
         super();
         this.taille = tableauVivants.length;
-        simulTimer = eventTimer;
+        simulTimer = new Timer(50, new ActionListener() {public void actionPerformed(ActionEvent e) {run();}});
         perfTimer.start();
         simulation = tableauVivants;
         display=affichage;
+        this.graph=graph;
     }
 
     /**
@@ -44,11 +47,13 @@ public class Plateau implements ActionListener {
      */
     public void setDisplay(Grille display) {
         this.display = display;
-        display.fps.stop();
+        display.stopRefresh();
     }
 
+    /**
+     * M&eacute;thode appel&eacute;e lors de chaque tour de simulation
+     */
     public void simuler() {
-        //mouvementTest();
         menageDesMorts(); //supprimme les vivants qui n'ont plus de points de vie
         mangerBouger(); //action principale
         perfCompteur +=1;
@@ -242,13 +247,16 @@ public class Plateau implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        System.out.println(perfCompteur +" itérations/seconde");
-        perfCompteur =0;
+        if(SIMULATION_ACTIVE){
+            System.out.println(perfCompteur +" itérations/seconde");
+            display.afficherTexte(perfCompteur +" itérations/seconde");
+            perfCompteur =0;
+        }
     }
 
     private Pos getRandomVivant() {
         Pos pos = Pos.getRandomPos(taille);
-        while (Pos.getTab(simulation, pos) == null) {
+        while (Pos.getTab(simulation, pos) == null && SIMULATION_ACTIVE) {
             pos = Pos.getRandomPos(taille);
         }
         return pos;
@@ -278,7 +286,7 @@ public class Plateau implements ActionListener {
         }
         if(nbVivants == 0) {
             System.out.println("Arrêt de la simulation");
-            simulTimer.stop(); //ça marche pas en fait
+            stopSimulation(); //ça marche pas en fait
         }
     }
 
@@ -293,5 +301,15 @@ public class Plateau implements ActionListener {
                     simulation[y][x].setDelay(ms);
             }
         }
+    }
+    public void startSimulation(){simulTimer.start();SIMULATION_ACTIVE=true;}
+    public void stopSimulation() {stop();simulTimer.stop();SIMULATION_ACTIVE=false;System.out.println("Simulation arrêtée");}
+    public void setSimulationDelay(int ms){simulTimer.setDelay(ms);}
+
+    @Override
+    public void run() {
+        simuler();
+        graph.addLapins(getNbreLapins());
+        graph.addPotirons(getNbrePotirons());
     }
 }

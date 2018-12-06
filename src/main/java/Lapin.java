@@ -37,9 +37,9 @@ public class Lapin extends Vivant{
     }
 
     @Override
-    protected void vivre(ActionEvent e){
+    protected void vivre(){
         if(pointsDeNutrition<=0)
-            super.vivre(e);
+            super.vivre();
         else
             jourSansManger();
     }
