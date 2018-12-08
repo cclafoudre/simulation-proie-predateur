@@ -71,7 +71,14 @@ public class Grille  extends JPanel implements Runnable, MouseListener, MouseMot
      * @param ici le vivant &agrave; afficher
      */
     public void dessineCase(Pos pos, Vivant ici){
+        Graphics g = getGraphics();
         dessineCase(pos.getX(), pos.getY(), ici);
+        if (ici == null)
+            g.setColor(Vivant.COULEUR);
+        else
+            g.setColor(ici.getCouleur());
+        Pos px = pos.toPixels(getWidth(), getHeight(), taille, tailleCase);
+        g.fillRect(px.X, px.Y, tailleCase-2, tailleCase-2);
     }
     /**
      * Dessine une seule case sur la grille sans se pr&eacute;occuper de rafra&icirc;chir l'affichache (c'est pour &ccedil;a que les cases nouvellement dessin&eacute;es se superposent aux menus
@@ -97,7 +104,7 @@ public class Grille  extends JPanel implements Runnable, MouseListener, MouseMot
     }
 
     /**
-     * Interface qui sert à effectuer proprement les modifications sur le tableau {@link Plateau#simulation} sans tout casser.
+     * Interface qui sert &agrave; effectuer proprement les modifications sur le tableau {@link Plateau#simulation} sans tout casser.
      */
     public interface EditListener{
         /**
@@ -106,6 +113,12 @@ public class Grille  extends JPanel implements Runnable, MouseListener, MouseMot
          * @return l'&eacute;l&eacute;ment cr&eacute;e
          */
         Vivant toggleVivant(Pos pos);
+
+        /**
+         * Force un vivant &agrave; la position donn&eacute;e
+         * @param pos position
+         * @param vivant &agrave; ins&eacute;rer
+         */
         void setVivant(Pos pos, Vivant vivant);
     }
 
@@ -145,35 +158,30 @@ public class Grille  extends JPanel implements Runnable, MouseListener, MouseMot
     private int indexApixelsY(int i){
         return ((getHeight() - tailleCase*taille) / 2)+tailleCase *i;
     }
-    private boolean pixelsAppartienentAImageX(int p){
-        return p>(getWidth() - tailleCase*taille)/2 && p<(getWidth() + tailleCase*taille)/2;
-    }
-    private boolean pixelsAppartienentAImageY(int p){
-        return p>(getHeight() - tailleCase*taille)/2 && p<(getWidth() + tailleCase*taille)/2;
-    }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if(pixelsAppartienentAImageX(e.getX()) && pixelsAppartienentAImageY(e.getY())){
-            Pos clicked = new Pos(pixelsAindexX(e.getX()), pixelsAindexY(e.getY()));
-            System.out.println(clicked);
+        Pos clicked = Pos.coordToPos(e.getX(),e.getY(),getWidth(),getHeight(),taille,tailleCase);
+//        Pos clicked = new Pos(pixelsAindexX(e.getX()), pixelsAindexY(e.getY()));
+        if(clicked.positionValide(taille)){
             dernierVivantSelectionne = editListener.toggleVivant(clicked);
             //repaint();
         }else{
-            System.out.println(e.getX()+" "+e.getY());
+            //System.out.println(e.getX()+" "+e.getY());
+            System.out.println("Position invalide: "+clicked);
         }
     }
     public void mousePressed(MouseEvent e) {}public void mouseReleased(MouseEvent e) {}public void mouseEntered(MouseEvent e) {}public void mouseExited(MouseEvent e) {}
     @Override
     public void mouseDragged(MouseEvent e) {
-        if(pixelsAppartienentAImageX(e.getX()) && pixelsAppartienentAImageY(e.getY())) {
-            Pos clicked = new Pos(pixelsAindexX(e.getX()), pixelsAindexY(e.getY()));
+        Pos clic = Pos.coordToPos(e.getX(),e.getY(),getWidth(),getHeight(),taille,tailleCase);
+        if(clic.positionValide(taille)) {
             Vivant nouveau=null;//valeur par défaut
             if(dernierVivantSelectionne instanceof Lapin)
                 nouveau=new Lapin();
             if(dernierVivantSelectionne instanceof Potiron)
                 nouveau=new Potiron();
-            editListener.setVivant(clicked,nouveau);
+            editListener.setVivant(clic,nouveau);
         }
 
     }public void mouseMoved(MouseEvent e) {}

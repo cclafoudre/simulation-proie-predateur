@@ -1,3 +1,5 @@
+import javax.swing.*;
+
 /**
  * Classe pour g&eacute;rer les positions X,Y avec plus de facilit&eacute;s
  */
@@ -85,5 +87,70 @@ public class Pos {
      */
     public boolean positionValide(int taille){
         return  (0<X && 0<Y && X<taille && Y<taille);
+    }
+
+    /**
+     * V&eacute;rifie que les coordonn&eacute;es en pixels sont incluses dans le domaine d'affichage de la simulation.
+     * @param p coordonn&eacute;e en pixel (X ou Y)
+     * @param tailleWindow taille du component : {@link JPanel#getWidth()},  {@link JPanel#getHeight()}
+     * @param tailleTableau taille (int) du tableau d'objets
+     * @param tailleCase taille d'un case du tableau d'objets en pixels
+     * @return vrai si c'est valide
+     */
+    public boolean pixelsAppartienentAImage(int p, int tailleWindow, int tailleTableau, int tailleCase){
+        return p>(tailleWindow - tailleCase*tailleTableau)/2 && p<(tailleWindow + tailleCase*tailleTableau)/2;
+    }
+
+    /**
+     * Convertit des coordonn&eacute;es en pixel en des index d'un tableau d'objets
+     * @param p coord en pixel
+     * @param tailleW taille du JPanel
+     * @param tailleCase taille d'un case du tableau d'objets
+     * @param taille taille du tableau d'objets
+     * @return index
+     */
+    public static int pixelsAindex(int p, int tailleW, int tailleCase, int taille){
+        return (p-(tailleW-tailleCase*taille)/2)/tailleCase;
+    }
+
+    /**
+     * Convertit des coordonn&eacute;es en pixel en des index d'un tableau d'objets
+     * @param i index
+     * @param tailleW taille du JPanel
+     * @param tailleCase taille d'un case du tableau d'objets
+     * @param taille taille du tableau d'objets
+     * @return coord en pixel
+     */
+    public static int indexApixels(int i, int tailleW, int tailleCase, int taille){
+        return ((tailleW - tailleCase*taille) / 2)+tailleCase *i;
+    }
+
+    /**
+     * Fait tout le travail pour renvoyer une coordonnée dans la base  du tableau d'objets à partir des pixels
+     * @param x pixel
+     * @param y pixel
+     * @param wWidth {@link JPanel#getWidth()}
+     * @param wHeight   {@link JPanel#getHeight()}
+     * @param tailleTableau int
+     * @param tailleCase int
+     * @return Pos
+     */
+    public static Pos coordToPos(int x, int y,int wWidth,int wHeight, int tailleTableau, int tailleCase){
+        return new Pos(pixelsAindex(x, wWidth, tailleCase, tailleTableau),
+                pixelsAindex(y, wHeight, tailleCase, tailleTableau)
+        );
+    }
+
+    /**
+     * Renvoie une coordonnée en pixels et non dans la base du tableau
+     * @param wWidth
+     * @param wHeight
+     * @param tailleTableau
+     * @param tailleCase
+     * @return
+     */
+    public Pos toPixels(int wWidth,int wHeight, int tailleTableau, int tailleCase){
+        return new Pos(indexApixels(X, wWidth, tailleCase, tailleTableau),
+                indexApixels(Y, wHeight, tailleCase, tailleTableau));
     }
 }

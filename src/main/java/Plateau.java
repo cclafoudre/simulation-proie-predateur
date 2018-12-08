@@ -39,6 +39,14 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
         display=affichage;
         display.addEditListener(this);
         this.graph=graph;
+        new Thread(()->{
+            try {
+                Thread.sleep(500);
+                startSimulation();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     /**

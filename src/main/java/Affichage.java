@@ -22,27 +22,28 @@ public class Affichage extends JFrame implements ActionListener {
 
     private JMenuBar barreMenus = new JMenuBar();
     private JMenu actions = new JMenu("Actions");
-    private JMenuItem boutonAction = new JMenuItem("Simuler un tour");
-    private JMenuItem boutonStart = new JMenuItem("Démarrer la simulation");
-    private JMenuItem boutonStop = new JMenuItem("Arrêter la simulation");
     private JMenuItem plusDeVivants = new JMenuItem("Ajouter des vivants");
     private JMenuItem moinsDeVivants = new JMenuItem("Supprimer des vivants");
-    private JMenuItem genVid = new JMenuItem("Générer la vidéo (ffmpeg requis)");
+//    private JMenuItem genVid = new JMenuItem("Générer la vidéo (ffmpeg requis)");
     private JRadioButtonMenuItem mLapin = new JRadioButtonMenuItem("Ajouter des lapins", new Icone(Lapin.COULEUR));
     private JRadioButtonMenuItem mPotiron = new JRadioButtonMenuItem("Ajouter des potirons", new Icone(Potiron.COULEUR));
     private JRadioButtonMenuItem mVide = new JRadioButtonMenuItem("Supprimer des vivants", new Icone(Vivant.COULEUR));
 
-    private JMenu parametres = new JMenu("Paramètres");
+    private JMenu affichage = new JMenu("Affichage");
     private JMenuItem infoZoom = new JMenuItem("Zoom");
     private JSlider tailleCase = new JSlider(4,50,Plateau.tailleCase);
     private JMenuItem vivantsTimer = new JMenuItem("Changer le délai de mort");
     private JSlider slideVitesse = new JSlider(1,100,50);
     private JMenuItem cleanGraph = new JMenuItem("Remise à zéro du graphique");
-    private JCheckBoxMenuItem capturePix = new JCheckBoxMenuItem("Enregistrer la simulation");
-
+//    private JCheckBoxMenuItem capturePix = new JCheckBoxMenuItem("Enregistrer la simulation");
     private JMenuItem textFPS = new JMenuItem("Vitesse d'affichage: T(s)");
     private JCheckBoxMenuItem singleRefresh = new JCheckBoxMenuItem("Rafraîchir tout le plateau");
     private JSlider slideFPS = new JSlider(1,60,30);
+
+    private JMenu simulMenu = new JMenu("Simulation");
+    private JMenuItem boutonAction = new JMenuItem("Simuler un tour");
+    private JMenuItem boutonStart = new JMenuItem("Démarrer la simulation");
+    private JMenuItem boutonStop = new JMenuItem("Arrêter la simulation");
 
     public Affichage(){
         super();
@@ -65,8 +66,8 @@ public class Affichage extends JFrame implements ActionListener {
         plusDeVivants.addActionListener(this);
         moinsDeVivants.addActionListener(this);
         cleanGraph.addActionListener(this);
-        capturePix.addActionListener(this);
-        genVid.addActionListener(this);
+//        capturePix.addActionListener(this);
+//        genVid.addActionListener(this);
         mLapin.addActionListener(this);
         mPotiron.addActionListener(this);
         mVide.addActionListener(this);
@@ -96,37 +97,38 @@ public class Affichage extends JFrame implements ActionListener {
         });
         singleRefresh.addActionListener(this);
 
-        parametres.add(infoZoom);
-        parametres.add(tailleCase);
-        parametres.add(capturePix);
-        parametres.add(new JSeparator());
-        parametres.add(textFPS);
-        parametres.add(slideFPS);
-        parametres.add(singleRefresh);
-        parametres.add(new JSeparator());
+        affichage.add(infoZoom);
+        affichage.add(tailleCase);
+//        affichage.add(capturePix);
+        affichage.add(new JSeparator());
+        affichage.add(textFPS);
+        affichage.add(slideFPS);
+        affichage.add(singleRefresh);
+        affichage.add(new JSeparator());
         JMenuItem a1 = new JMenuItem("Délai de simulation");
         a1.setEnabled(false);
-        parametres.add(a1);
-        parametres.add(slideVitesse);
-        parametres.add(new JSeparator());
-        parametres.add(vivantsTimer);
-        parametres.add(new JSeparator());
-        parametres.add(cleanGraph);
-        barreMenus.add(parametres);
+        affichage.add(a1);
+        affichage.add(slideVitesse);
+        affichage.add(new JSeparator());
+        affichage.add(vivantsTimer);
+        affichage.add(new JSeparator());
+        affichage.add(cleanGraph);
+        barreMenus.add(affichage);
 
-        actions.add(boutonAction);
-        actions.add(boutonStart);
-        actions.add(boutonStop);
-        actions.add(new JSeparator());
+        simulMenu.add(boutonAction);
+        simulMenu.add(boutonStart);
+        simulMenu.add(boutonStop);
+
         actions.add(plusDeVivants);
         actions.add(moinsDeVivants);
-        actions.add(new JSeparator());
-        actions.add(genVid);
+//        actions.add(new JSeparator());
+//        actions.add(genVid);
         actions.add(new JSeparator());
         actions.add(mLapin);
         actions.add(mPotiron);
         actions.add(mVide);
 
+        barreMenus.add(simulMenu);
         barreMenus.add(actions);
         //barreMenus.add(boutonStart);
         //barreMenus.add(boutonStop);
@@ -141,7 +143,7 @@ public class Affichage extends JFrame implements ActionListener {
             }
             plateau.genererAlea(1000,50, graphique);
         }).start();
-        JOptionPane.showMessageDialog(null,new JLabel("Veuillez lancer la simulation depuis le menu Actions"),"Task failed successfully !",JOptionPane.INFORMATION_MESSAGE);
+        //JOptionPane.showMessageDialog(null,new JLabel("Veuillez lancer la simulation depuis le menu Simulation > Lancer"),"Task failed successfully !",JOptionPane.INFORMATION_MESSAGE);
     }
 
     public static void main(String[] args) throws URISyntaxException, IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
