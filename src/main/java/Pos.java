@@ -86,7 +86,7 @@ public class Pos {
      * @return
      */
     public boolean positionValide(int taille){
-        return  (0<X && 0<Y && X<taille && Y<taille);
+        return  (0<=X && 0<=Y && X<taille && Y<taille);
     }
 
     /**
