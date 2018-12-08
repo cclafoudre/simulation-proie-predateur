@@ -59,8 +59,8 @@ public class Grille  extends JPanel implements Runnable, MouseListener, MouseMot
             g.setColor(Vivant.COULEUR);
         else
             g.setColor(ici.getCouleur()); //utilise la couleur du vivant
-        g.fillRect(indexApixels(x), //dessine la case relativement au milieu de l'écran
-                indexApixels(y),
+        g.fillRect(indexApixelsX(x), //dessine la case relativement au milieu de l'écran
+                indexApixelsY(y),
                 tailleCase-2,
                 tailleCase-2);
     }
@@ -133,20 +133,29 @@ public class Grille  extends JPanel implements Runnable, MouseListener, MouseMot
         g.setColor(Color.red);
         g.drawString(str,5,10);
     }
-    private int pixelsAindex(int xp){
+    private int pixelsAindexX(int xp){
         return (xp-(getWidth()-tailleCase*taille)/2)/tailleCase;
     }
-    private int indexApixels(int i){
+    private int pixelsAindexY(int xp){
+        return (xp-(getHeight()-tailleCase*taille)/2)/tailleCase;
+    }
+    private int indexApixelsX(int i){
         return ((getWidth() - tailleCase*taille) / 2)+tailleCase *i;
     }
-    private boolean pixelsAppartienentAImage(int p){
+    private int indexApixelsY(int i){
+        return ((getHeight() - tailleCase*taille) / 2)+tailleCase *i;
+    }
+    private boolean pixelsAppartienentAImageX(int p){
         return p>(getWidth() - tailleCase*taille)/2 && p<(getWidth() + tailleCase*taille)/2;
+    }
+    private boolean pixelsAppartienentAImageY(int p){
+        return p>(getHeight() - tailleCase*taille)/2 && p<(getWidth() + tailleCase*taille)/2;
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if(pixelsAppartienentAImage(e.getX()) && pixelsAppartienentAImage(e.getY())){
-            Pos clicked = new Pos(pixelsAindex(e.getX()), pixelsAindex(e.getY()));
+        if(pixelsAppartienentAImageX(e.getX()) && pixelsAppartienentAImageY(e.getY())){
+            Pos clicked = new Pos(pixelsAindexX(e.getX()), pixelsAindexY(e.getY()));
             System.out.println(clicked);
             dernierVivantSelectionne = editListener.toggleVivant(clicked);
             //repaint();
@@ -157,8 +166,8 @@ public class Grille  extends JPanel implements Runnable, MouseListener, MouseMot
     public void mousePressed(MouseEvent e) {}public void mouseReleased(MouseEvent e) {}public void mouseEntered(MouseEvent e) {}public void mouseExited(MouseEvent e) {}
     @Override
     public void mouseDragged(MouseEvent e) {
-        if(pixelsAppartienentAImage(e.getX()) && pixelsAppartienentAImage(e.getY())) {
-            Pos clicked = new Pos(pixelsAindex(e.getX()), pixelsAindex(e.getY()));
+        if(pixelsAppartienentAImageX(e.getX()) && pixelsAppartienentAImageY(e.getY())) {
+            Pos clicked = new Pos(pixelsAindexX(e.getX()), pixelsAindexY(e.getY()));
             Vivant nouveau=null;//valeur par défaut
             if(dernierVivantSelectionne instanceof Lapin)
                 nouveau=new Lapin();

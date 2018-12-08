@@ -1,6 +1,7 @@
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -27,6 +28,9 @@ public class Affichage extends JFrame implements ActionListener {
     private JMenuItem plusDeVivants = new JMenuItem("Ajouter des vivants");
     private JMenuItem moinsDeVivants = new JMenuItem("Supprimer des vivants");
     private JMenuItem genVid = new JMenuItem("Générer la vidéo (ffmpeg requis)");
+    private JRadioButtonMenuItem mLapin = new JRadioButtonMenuItem("Ajouter des lapins", new Icone(Lapin.COULEUR));
+    private JRadioButtonMenuItem mPotiron = new JRadioButtonMenuItem("Ajouter des potirons", new Icone(Potiron.COULEUR));
+    private JRadioButtonMenuItem mVide = new JRadioButtonMenuItem("Supprimer des vivants", new Icone(Vivant.COULEUR));
 
     private JMenu parametres = new JMenu("Paramètres");
     private JMenuItem infoZoom = new JMenuItem("Zoom");
@@ -63,6 +67,10 @@ public class Affichage extends JFrame implements ActionListener {
         cleanGraph.addActionListener(this);
         capturePix.addActionListener(this);
         genVid.addActionListener(this);
+        mLapin.addActionListener(this);
+        mPotiron.addActionListener(this);
+        mVide.addActionListener(this);
+
 
         tailleCase.setToolTipText("Taille des cases");
         tailleCase.addChangeListener(new ChangeListener() {
@@ -87,6 +95,7 @@ public class Affichage extends JFrame implements ActionListener {
             }
         });
         singleRefresh.addActionListener(this);
+
         parametres.add(infoZoom);
         parametres.add(tailleCase);
         parametres.add(capturePix);
@@ -113,9 +122,14 @@ public class Affichage extends JFrame implements ActionListener {
         actions.add(moinsDeVivants);
         actions.add(new JSeparator());
         actions.add(genVid);
+        actions.add(new JSeparator());
+        actions.add(mLapin);
+        actions.add(mPotiron);
+        actions.add(mVide);
+
         barreMenus.add(actions);
-        barreMenus.add(boutonStart);
-        barreMenus.add(boutonStop);
+        //barreMenus.add(boutonStart);
+        //barreMenus.add(boutonStop);
         setJMenuBar(barreMenus);
 
         setVisible(true);
@@ -139,7 +153,7 @@ public class Affichage extends JFrame implements ActionListener {
             System.exit(0);
         } //merci à internet pour l'astuce !
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        //UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
         new Affichage();
     }
 
@@ -184,5 +198,40 @@ public class Affichage extends JFrame implements ActionListener {
                 plateau.setMortDelay(vitesse);
             } catch (NumberFormatException e1){ }
         }
+        if(e.getSource().equals(mLapin)) {
+            grille.dernierVivantSelectionne = new Lapin();
+            mPotiron.setSelected(false);
+            mVide.setSelected(false);
+        }
+        if(e.getSource().equals(mPotiron)) {
+            grille.dernierVivantSelectionne = new Potiron();
+            mLapin.setSelected(false);
+            mVide.setSelected(false);
+        }
+        if(e.getSource().equals(mVide)) {
+            grille.dernierVivantSelectionne = null;
+            mPotiron.setSelected(false);
+            mLapin.setSelected(false);
+        }
     }
 }
+class Icone implements Icon{
+    private Color couleur;
+    public Icone(Color color){couleur=color;}
+    @Override
+    public void paintIcon(Component c, Graphics g, int x, int y) {
+        g.setColor(couleur);
+        g.fillRect(x,y,10,10);
+    }
+
+    @Override
+    public int getIconWidth() {
+        return 10;
+    }
+
+    @Override
+    public int getIconHeight() {
+        return 10;
+    }
+}
+
