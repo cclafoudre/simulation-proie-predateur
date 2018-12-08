@@ -1,11 +1,6 @@
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Date;
 import java.util.Random;
 
 /**
@@ -13,7 +8,7 @@ import java.util.Random;
  * N&eacute;cessite un objet {@link Grille} pour l'affichage, &agrave; d&eacute;finir avec {@link Plateau#setDisplay(Grille)} car les deux classes ont des d&eacute;pendances mutuelles.
  * L'attribut {@link Plateau#SIMULATION_ACTIVE} permet d'arr&ecirc;ter les boucles "while" encore en cours lors de l'arr&ecirc;t de la simulation, par exempe quand il n'y a plus de vivants
  */
-public class Plateau extends Thread implements ActionListener{
+public class Plateau extends Thread implements ActionListener, Grille.EditListener {
     public static boolean SIMULATION_ACTIVE;
     public Vivant[][] simulation;
     public static int tailleCase = 15;
@@ -34,10 +29,15 @@ public class Plateau extends Thread implements ActionListener{
     public Plateau(Vivant[][] tableauVivants, Grille affichage, Graph graph) {
         super();
         this.taille = tableauVivants.length;
-        simulTimer = new Timer(50, new ActionListener() {public void actionPerformed(ActionEvent e) {run();}});
+        simulTimer = new Timer(50, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                run();
+            }
+        });
         perfTimer.start();
         simulation = tableauVivants;
         display=affichage;
+        display.addEditListener(this);
         this.graph=graph;
     }
 
@@ -113,10 +113,11 @@ public class Plateau extends Thread implements ActionListener{
      * @param nouveau le Vivant &agrave; ins&eacute;rer
      * @param pos la position o&ugrave; le mettre
      */
-    public void ajouterVivant(Vivant nouveau, Pos pos) {
+    public Vivant ajouterVivant(Vivant nouveau, Pos pos) {
         Pos.setTab(simulation, pos, nouveau);
         nouveau.setPos(pos);
         display.dessineCase(pos,nouveau);
+        return nouveau;
     }
 
     /**
@@ -311,5 +312,30 @@ public class Plateau extends Thread implements ActionListener{
         simuler();
         graph.addLapins(getNbreLapins());
         graph.addPotirons(getNbrePotirons());
+    }
+
+    @Override
+    public Vivant toggleVivant(Pos pos) {
+        if(estVide(pos)){
+            return ajouterVivant(new Lapin(), pos);
+        }
+        if(selectVivant(pos) instanceof Lapin){
+            return ajouterVivant(new Potiron(), pos);
+
+        }
+        if(selectVivant(pos) instanceof Potiron){
+            enleverVivant(pos);
+            return null;
+        }
+        return null;
+    }
+    @Override
+    public void setVivant(Pos pos, Vivant vivant){
+        if(vivant!=null)
+            ajouterVivant(vivant, pos);
+        else {
+            Pos.setTab(simulation, pos, null);
+            display.dessineCase(pos, null);
+        }
     }
 }

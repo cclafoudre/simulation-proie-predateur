@@ -1,17 +1,19 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
+
 /**
  * Classe utilis&eacute;e pour l'affichage graphique de la simulation.
  * Pour afficher uniquement la modification sur une case, utiliser la m&eacute;thode {@link Grille#dessineCase(int, int, Vivant) dessineCase()}
  * Pour tout afficher d'un coup, appeler la m&eacute;thode {@link Grille#repaint() repaint()}
  */
-public class Grille  extends JPanel implements Runnable{
+public class Grille  extends JPanel implements Runnable, MouseListener, MouseMotionListener {
     int taille = 45;
     int tailleCase = 10;
     private Vivant[][] simulation;
     private Timer fps;
+    public EditListener editListener;
+    public Vivant dernierVivantSelectionne;
 
     /**
      * @param simulation la r&eacute;f&eacute;rence d'un tableau de vivants
@@ -26,6 +28,8 @@ public class Grille  extends JPanel implements Runnable{
             }
         });
         //fps.start();
+        this.addMouseListener(this);
+        this.addMouseMotionListener(this);
     }
 
     /**
@@ -55,8 +59,8 @@ public class Grille  extends JPanel implements Runnable{
             g.setColor(Vivant.COULEUR);
         else
             g.setColor(ici.getCouleur()); //utilise la couleur du vivant
-        g.fillRect(((getWidth() - tailleCase*taille) / 2)+tailleCase * (x), //dessine la case relativement au milieu de l'écran
-                ((getHeight() - tailleCase*taille) / 2)+tailleCase * (y),
+        g.fillRect(indexApixels(x), //dessine la case relativement au milieu de l'écran
+                indexApixels(y),
                 tailleCase-2,
                 tailleCase-2);
     }
@@ -92,6 +96,27 @@ public class Grille  extends JPanel implements Runnable{
         repaint();
     }
 
+    /**
+     * Interface qui sert à effectuer proprement les modifications sur le tableau {@link Plateau#simulation} sans tout casser.
+     */
+    public interface EditListener{
+        /**
+         * Change un lapin en potiron, un potiron en rien, et rien en lapin.
+         * @param pos la position de l'&eacute;l&eacute;ment
+         * @return l'&eacute;l&eacute;ment cr&eacute;e
+         */
+        Vivant toggleVivant(Pos pos);
+        void setVivant(Pos pos, Vivant vivant);
+    }
+
+    /**
+     * Assigne l'interface un peu comme le font les codes Java Swing
+     * @param that une classe qui impl&eacute;ment {@link EditListener}
+     */
+    public void addEditListener(EditListener that){
+        this.editListener = that;
+    }
+
     public void stopRefresh() {
         this.fps.stop();
     }
@@ -108,4 +133,39 @@ public class Grille  extends JPanel implements Runnable{
         g.setColor(Color.red);
         g.drawString(str,5,10);
     }
+    private int pixelsAindex(int xp){
+        return (xp-(getWidth()-tailleCase*taille)/2)/tailleCase;
+    }
+    private int indexApixels(int i){
+        return ((getWidth() - tailleCase*taille) / 2)+tailleCase *i;
+    }
+    private boolean pixelsAppartienentAImage(int p){
+        return p>(getWidth() - tailleCase*taille)/2 && p<(getWidth() + tailleCase*taille)/2;
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        if(pixelsAppartienentAImage(e.getX()) && pixelsAppartienentAImage(e.getY())){
+            Pos clicked = new Pos(pixelsAindex(e.getX()), pixelsAindex(e.getY()));
+            System.out.println(clicked);
+            dernierVivantSelectionne = editListener.toggleVivant(clicked);
+            //repaint();
+        }else{
+            System.out.println(e.getX()+" "+e.getY());
+        }
+    }
+    public void mousePressed(MouseEvent e) {}public void mouseReleased(MouseEvent e) {}public void mouseEntered(MouseEvent e) {}public void mouseExited(MouseEvent e) {}
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        if(pixelsAppartienentAImage(e.getX()) && pixelsAppartienentAImage(e.getY())) {
+            Pos clicked = new Pos(pixelsAindex(e.getX()), pixelsAindex(e.getY()));
+            Vivant nouveau=null;//valeur par défaut
+            if(dernierVivantSelectionne instanceof Lapin)
+                nouveau=new Lapin();
+            if(dernierVivantSelectionne instanceof Potiron)
+                nouveau=new Potiron();
+            editListener.setVivant(clicked,nouveau);
+        }
+
+    }public void mouseMoved(MouseEvent e) {}
 }
