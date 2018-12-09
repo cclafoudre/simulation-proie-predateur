@@ -123,6 +123,8 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
      */
     public Vivant ajouterVivant(Vivant nouveau, Pos pos) {
         Pos.setTab(simulation, pos, nouveau);
+        nouveau.visible();
+        pos.getX();
         nouveau.setPos(pos);
         display.dessineCase(pos,nouveau);
         return nouveau;

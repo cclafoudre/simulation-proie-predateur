@@ -17,7 +17,7 @@ import java.net.URISyntaxException;
  * et {@link Plateau} (logique m&eacute;tier des tours de simulation, n'effectue aucun affichage)
  */
 public class Affichage extends JFrame implements ActionListener {
-    private Vivant[][] simulation = new Vivant[45][45];
+    private Vivant[][] simulation;
     private Plateau plateau;
     private Grille grille;
     private Graph graphique;
@@ -48,8 +48,9 @@ public class Affichage extends JFrame implements ActionListener {
     private JMenuItem boutonAction = new JMenuItem("Simuler un tour");
     private JMenuItem startStopSimul = new JMenuItem("Démarrer/arrêter la simulation");
 
-    public Affichage(){
+    public Affichage(int taille){
         super();
+        simulation = new Vivant[taille][taille];
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(800,850);
         setTitle("Simluation Proie-prédateur");
@@ -168,12 +169,21 @@ public class Affichage extends JFrame implements ActionListener {
         if (args.length == 0 && nomJar.toString().endsWith("jar")) {
                 // re-launch the app itselft with VM option passed
             System.out.println(nomJar.getPath());
-            Runtime.getRuntime().exec(new String[] {"java", "-Xmx100m", "-jar", nomJar.getPath(), "test"}); //ça évite que le programme prenne 1Go de RAM ...
+            Runtime.getRuntime().exec(new String[] {"java", "-Xmx100m", "-jar", nomJar.getPath(), "45"}); //ça évite que le programme prenne 1Go de RAM ...
             System.exit(0);
         } //merci à internet pour l'astuce !
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         //UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-        new Affichage();
+        for (int i = 0; i < args.length; i++) {
+            System.out.print(args[i]+" ");
+            System.out.println(Integer.parseInt(args[i]));
+        }
+        try{
+            System.out.println(Integer.parseInt(args[0]));
+            new Affichage(Integer.parseInt(args[0]));
+        }catch (Exception e){
+            new Affichage(20);
+        }
     }
 
     public void actionPerformed(ActionEvent e) {

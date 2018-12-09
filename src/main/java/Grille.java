@@ -8,7 +8,7 @@ import java.awt.event.*;
  * Pour tout afficher d'un coup, appeler la m&eacute;thode {@link Grille#repaint() repaint()}
  */
 public class Grille  extends JPanel implements Runnable, MouseListener, MouseMotionListener {
-    int taille = 45;
+    int taille;
     int tailleCase = 10;
     private Vivant[][] simulation;
     private Timer fps;
