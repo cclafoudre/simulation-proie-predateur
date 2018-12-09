@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 /**
  * Fen&ecirc;tre affichant une courbe de l'&eacute;volution des potions/lapins en fonction du temps.
  */
-public class Graph extends JPanel implements ActionListener {
+public class Graph extends JPanel implements ActionListener { //il faudrait passer à g.drawPolyline();
     protected BufferedImage image;
     //public int[] serieDonnee;
     public int[] serieLapins;
@@ -24,7 +24,7 @@ public class Graph extends JPanel implements ActionListener {
         //serieDonnee = new int[longeur];
         serieLapins = new int[longeur];
         seriePotirons = new int[longeur];
-        image = new BufferedImage(timeWindow*zoomX, 700,BufferedImage.TYPE_USHORT_555_RGB);
+        image = new BufferedImage(timeWindow*zoomX, 1000,BufferedImage.TYPE_USHORT_555_RGB);
         new Timer(32, this).start();
     }
 
@@ -95,7 +95,7 @@ public class Graph extends JPanel implements ActionListener {
     public void clean() {
         image.flush();
         image=null;
-        image = new BufferedImage(longeur*zoomX, 700,BufferedImage.TYPE_USHORT_555_RGB);
+        image = new BufferedImage(longeur*zoomX, 1000,BufferedImage.TYPE_USHORT_555_RGB);
         indexLapins=0;
         indexPotirons=0;
     }
@@ -130,7 +130,7 @@ public class Graph extends JPanel implements ActionListener {
      * @param largeur
      * @param hauteur
      */
-    public void resize(int largeur, int hauteur){
+    public void setSize(int largeur, int hauteur){
         longeur = largeur;
         image = new BufferedImage(longeur*zoomX, hauteur,BufferedImage.TYPE_INT_RGB);
     }

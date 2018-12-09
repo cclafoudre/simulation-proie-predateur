@@ -4,6 +4,8 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -24,6 +26,7 @@ public class Affichage extends JFrame implements ActionListener {
     private JMenu actions = new JMenu("Actions");
     private JMenuItem plusDeVivants = new JMenuItem("Ajouter des vivants");
     private JMenuItem moinsDeVivants = new JMenuItem("Supprimer des vivants");
+    private JMenuItem resetVivants = new JMenuItem("Tout supprimer");
 //    private JMenuItem genVid = new JMenuItem("Générer la vidéo (ffmpeg requis)");
     private JRadioButtonMenuItem mLapin = new JRadioButtonMenuItem("Ajouter des lapins", new Icone(Lapin.COULEUR));
     private JRadioButtonMenuItem mPotiron = new JRadioButtonMenuItem("Ajouter des potirons", new Icone(Potiron.COULEUR));
@@ -34,16 +37,16 @@ public class Affichage extends JFrame implements ActionListener {
     private JSlider tailleCase = new JSlider(4,50,Plateau.tailleCase);
     private JMenuItem vivantsTimer = new JMenuItem("Changer le délai de mort");
     private JSlider slideVitesse = new JSlider(1,100,50);
-    private JMenuItem cleanGraph = new JMenuItem("Remise à zéro du graphique");
+    private JMenuItem cleanGraph = new JMenuItem("Nettoyer le graphique");
 //    private JCheckBoxMenuItem capturePix = new JCheckBoxMenuItem("Enregistrer la simulation");
     private JMenuItem textFPS = new JMenuItem("Vitesse d'affichage: T(s)");
     private JCheckBoxMenuItem singleRefresh = new JCheckBoxMenuItem("Rafraîchir tout le plateau");
     private JSlider slideFPS = new JSlider(1,60,30);
+    private JMenuItem autofit = new JMenuItem("Ajuster la taille automatiquement");
 
     private JMenu simulMenu = new JMenu("Simulation");
     private JMenuItem boutonAction = new JMenuItem("Simuler un tour");
-    private JMenuItem boutonStart = new JMenuItem("Démarrer la simulation");
-    private JMenuItem boutonStop = new JMenuItem("Arrêter la simulation");
+    private JMenuItem startStopSimul = new JMenuItem("Démarrer/arrêter la simulation");
 
     public Affichage(){
         super();
@@ -60,18 +63,31 @@ public class Affichage extends JFrame implements ActionListener {
         setContentPane(grille);
 
         boutonAction.addActionListener(this);
-        boutonStart.addActionListener(this);
-        boutonStop.addActionListener(this);
+        startStopSimul.addActionListener(this);
         vivantsTimer.addActionListener(this);
         plusDeVivants.addActionListener(this);
         moinsDeVivants.addActionListener(this);
         cleanGraph.addActionListener(this);
+        resetVivants.addActionListener(this);
 //        capturePix.addActionListener(this);
 //        genVid.addActionListener(this);
         mLapin.addActionListener(this);
         mPotiron.addActionListener(this);
         mVide.addActionListener(this);
+        autofit.addActionListener(this);
 
+        startStopSimul.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
+        boutonAction.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
+        mLapin.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, 0));
+        mPotiron.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0));
+        mVide.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, 0));
+
+        /*plusDeVivants.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, 0));
+        plusDeVivants.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS, KeyEvent.SHIFT_DOWN_MASK));
+        moinsDeVivants.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, 0));*/
+
+        plusDeVivants.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ADD, 0));
+        moinsDeVivants.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SUBTRACT, 0));
 
         tailleCase.setToolTipText("Taille des cases");
         tailleCase.addChangeListener(new ChangeListener() {
@@ -99,30 +115,31 @@ public class Affichage extends JFrame implements ActionListener {
 
         affichage.add(infoZoom);
         affichage.add(tailleCase);
+        affichage.add(autofit);
 //        affichage.add(capturePix);
         affichage.add(new JSeparator());
         affichage.add(textFPS);
         affichage.add(slideFPS);
         affichage.add(singleRefresh);
         affichage.add(new JSeparator());
-        JMenuItem a1 = new JMenuItem("Délai de simulation");
-        a1.setEnabled(false);
-        affichage.add(a1);
-        affichage.add(slideVitesse);
-        affichage.add(new JSeparator());
-        affichage.add(vivantsTimer);
-        affichage.add(new JSeparator());
         affichage.add(cleanGraph);
         barreMenus.add(affichage);
 
         simulMenu.add(boutonAction);
-        simulMenu.add(boutonStart);
-        simulMenu.add(boutonStop);
+        simulMenu.add(startStopSimul);
+        simulMenu.add(new JSeparator());
+        JMenuItem a1 = new JMenuItem("Délai de simulation");
+        a1.setEnabled(false);
+        simulMenu.add(a1);
+        simulMenu.add(slideVitesse);
+        simulMenu.add(new JSeparator());
+        simulMenu.add(vivantsTimer);
 
         actions.add(plusDeVivants);
         actions.add(moinsDeVivants);
 //        actions.add(new JSeparator());
 //        actions.add(genVid);
+        actions.add(resetVivants);
         actions.add(new JSeparator());
         actions.add(mLapin);
         actions.add(mPotiron);
@@ -163,18 +180,22 @@ public class Affichage extends JFrame implements ActionListener {
         if (e.getSource().equals(boutonAction)) {
             //System.out.println("On effectue un tour de simulation");
             //new Thread(()->{
-            plateau.simuler();
+            Plateau.SIMULATION_ACTIVE=true;
+            plateau.run();
+            Plateau.SIMULATION_ACTIVE=false; //sinon la boucle "getRandomVivant" renvoie null car elle s'arrête direct
             //}).start();
             //effectuer un tour
         }
         if(e.getSource().equals(cleanGraph)){graphique.clean();}
+        if(e.getSource().equals(autofit)) {
+            tailleCase.setValue(grille.autoFit());
+        }
 
-
-        if(e.getSource().equals(boutonStart)){plateau.startSimulation();}
-        if(e.getSource().equals(boutonStop)){plateau.stopSimulation();}
+        if(e.getSource().equals(startStopSimul)){toggleSimulation();}
 
         if(e.getSource().equals(plusDeVivants)){plateau.genererAlea(200,10, graphique);}
         if(e.getSource().equals(moinsDeVivants)){plateau.supprAlea(100, graphique);}
+        if(e.getSource().equals(resetVivants)){plateau.resetVivants();grille.repaint();}
 
         /*if(e.getSource().equals(capturePix)){plateau.toggleCapture();}
         if(e.getSource().equals(genVid)){plateau.lancerFfmpeg();}*/
@@ -215,6 +236,15 @@ public class Affichage extends JFrame implements ActionListener {
             mPotiron.setSelected(false);
             mLapin.setSelected(false);
         }
+    }
+    public void setSize(int largeur, int hauteur){
+        super.setSize(largeur, hauteur);
+    }
+    private void toggleSimulation(){
+        if(plateau.isSimulationActive())
+            plateau.stopSimulation();
+        else
+            plateau.startSimulation();
     }
 }
 class Icone implements Icon{

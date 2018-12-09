@@ -152,7 +152,8 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
      * @return Le vivant &agrave; la position demand&eacute;e, peut &ecirc;tre "null"
      */
     public Vivant selectVivant(Pos pos) {
-        return (Vivant) Pos.getTab(simulation, pos);
+        Object a = Pos.getTab(simulation, pos);
+        return (Vivant) a;
     }
 
     public boolean estVide(Pos pos){
@@ -212,23 +213,32 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
     }
 
     public void supprAlea(int nombre, Graph graph) {
-        final int[] n = {0};
-        new Thread(() -> {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        int total=(getNbrePotirons()+getNbreLapins());
+        if(nombre>=total) {
+            resetVivants();
+            display.repaint();
+        }
+        else {
+            int nbVivants=0;
+            while(nbVivants<nombre){
+                Pos pos = Pos.getRandomPos(taille);
+                if (Pos.getTab(simulation, pos) != null) {
+                    enleverVivant(pos);
+                    graph.addLapins(getNbreLapins());
+                    graph.addPotirons(getNbrePotirons());
+                    nbVivants +=1;
+                }
             }
-            n[0] = 0;
-            System.out.println("Génération arrêtée");
-        }).start();
-        while (n[0] < nombre) {
-            Pos pos = Pos.getRandomPos(taille);
-            if (Pos.getTab(simulation, pos) != null) {
-                enleverVivant(pos);
-                graph.addLapins(getNbreLapins());
-                graph.addPotirons(getNbrePotirons());
-                n[0] += 1;
+        }
+    }
+
+    /**
+     * Supprimme tous les vivants du plateau
+     */
+    public void resetVivants(){
+        for (int y = 0; y < simulation.length; y++) {
+            for (int x = 0; x < simulation[y].length; x++) {
+                simulation[y][x]=null;
             }
         }
     }
@@ -314,6 +324,7 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
     public void startSimulation(){simulTimer.start();SIMULATION_ACTIVE=true;}
     public void stopSimulation() {stop();simulTimer.stop();SIMULATION_ACTIVE=false;System.out.println("Simulation arrêtée");}
     public void setSimulationDelay(int ms){simulTimer.setDelay(ms);}
+    public boolean isSimulationActive(){return simulTimer.isRunning();}
 
     @Override
     public void run() {

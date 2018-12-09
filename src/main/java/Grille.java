@@ -13,7 +13,7 @@ public class Grille  extends JPanel implements Runnable, MouseListener, MouseMot
     private Vivant[][] simulation;
     private Timer fps;
     public EditListener editListener;
-    public Vivant dernierVivantSelectionne;
+    public Vivant dernierVivantSelectionne= new Potiron();
 
     /**
      * @param simulation la r&eacute;f&eacute;rence d'un tableau de vivants
@@ -161,15 +161,15 @@ public class Grille  extends JPanel implements Runnable, MouseListener, MouseMot
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        Pos clicked = Pos.coordToPos(e.getX(),e.getY(),getWidth(),getHeight(),taille,tailleCase);
-//        Pos clicked = new Pos(pixelsAindexX(e.getX()), pixelsAindexY(e.getY()));
+        /*Pos clicked = Pos.coordToPos(e.getX(),e.getY(),getWidth(),getHeight(),taille,tailleCase);
         if(clicked.positionValide(taille)){
             dernierVivantSelectionne = editListener.toggleVivant(clicked);
             //repaint();
         }else{
             //System.out.println(e.getX()+" "+e.getY());
             System.out.println("Position invalide: "+clicked);
-        }
+        }*/
+        mouseDragged(e);
     }
     public void mousePressed(MouseEvent e) {}public void mouseReleased(MouseEvent e) {}public void mouseEntered(MouseEvent e) {}public void mouseExited(MouseEvent e) {}
     @Override
@@ -185,4 +185,10 @@ public class Grille  extends JPanel implements Runnable, MouseListener, MouseMot
         }
 
     }public void mouseMoved(MouseEvent e) {}
+
+    public int autoFit(){
+        tailleCase=(Math.min(getHeight(), getWidth())/taille)-1;
+        repaint();
+        return tailleCase;
+    }
 }
