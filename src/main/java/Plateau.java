@@ -29,7 +29,7 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
     public Plateau(Vivant[][] tableauVivants, Grille affichage, Graph graph) {
         super();
         this.taille = tableauVivants.length;
-        simulTimer = new Timer(50, new ActionListener() {
+        simulTimer = new Timer(1, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 run();
             }
@@ -63,34 +63,42 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
      */
     public void simuler() {
         menageDesMorts(); //supprimme les vivants qui n'ont plus de points de vie
-        mangerBouger(); //action principale
+        Vivant initial = getRandomVivant();
+        mangerBouger(initial); //action principale
+        reproduction(initial);
         perfCompteur +=1;
+    }
+
+    private void reproduction(Vivant vivant){
+        if(vivant.peutSeReproduire()){
+            if(vivant instanceof Lapin)
+                ajouterVivant(new Lapin(), getRandomVide());
+            if(vivant instanceof Potiron)
+                ajouterVivant(new Potiron(),getRandomVide());
+        }
     }
 
     /**
      * Entrée d'une action sur les vivants
      */
-    private void mangerBouger() {
-        Pos initial = getRandomVivant();
-        if((selectVivant(initial) instanceof Lapin)) { //le fait manger si c'est un lapin
-            lapinsMangent(initial);
+    private void mangerBouger(Vivant initial) {
+        if((initial instanceof Lapin)) { //le fait manger si c'est un lapin
+            lapinsMangent((Lapin)initial);
         }
         deplacement(initial); //il se séplace dans tous les cas
     }
 
-    private void deplacement(Pos initial) {
+    private void deplacement(Vivant initial) {
         int dx= new Random().nextInt(3)-1; //on bouge d'une case dans une direction au hazard (& en diagoanel)
         int dy= new Random().nextInt(3)-1;
-        Pos destination = new Pos(initial.getX()+dx, initial.getY()+dy);
+        Pos destination = new Pos(initial.position.getX()+dx, initial.position.getY()+dy);
         if(destination.positionValide(taille) && estVide(destination)){
             Vivant vaBouger = enleverVivant(initial);
             ajouterVivant(vaBouger, destination);
         }
     }
 
-    private void lapinsMangent(Pos initial) {
-        //Pos initial = getRandomVivant();
-            Lapin predateur = (Lapin) selectVivant(initial);
+    private void lapinsMangent(Lapin predateur) {
             for (int j = - 1; j <  1; j++) {
                 for (int i = -1; i < 1; i++) {
                     Pos dest = new Pos(predateur.getPos().getX() + i, predateur.getPos().getY() + j);
@@ -123,8 +131,6 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
      */
     public Vivant ajouterVivant(Vivant nouveau, Pos pos) {
         Pos.setTab(simulation, pos, nouveau);
-        nouveau.visible();
-        pos.getX();
         nouveau.setPos(pos);
         display.dessineCase(pos,nouveau);
         return nouveau;
@@ -195,8 +201,9 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
         });
         safe.start();
         while (nP[0] < nbrePotiron) {
-            Pos pos = Pos.getRandomPos(taille);
-            if (Pos.getTab(simulation, pos) == null) {
+            //Pos pos = Pos.getRandomPos(taille);
+            Pos pos = getRandomVide();
+            if (selectVivant(pos) == null) {
                 ajouterVivant(new Potiron(), pos);
                 graph.addPotirons(getNbrePotirons());
                 nP[0] += 1;
@@ -275,12 +282,12 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
         }
     }
 
-    private Pos getRandomVivant() {
+    private Vivant getRandomVivant() {
         Pos pos = Pos.getRandomPos(taille);
-        while (Pos.getTab(simulation, pos) == null && SIMULATION_ACTIVE) {
+        while (selectVivant(pos) == null && SIMULATION_ACTIVE) {
             pos = Pos.getRandomPos(taille);
         }
-        return pos;
+        return selectVivant(pos);
     }
 
     private Pos getRandomVide(){

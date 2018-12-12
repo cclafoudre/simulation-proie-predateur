@@ -10,6 +10,14 @@ public class Potiron extends Vivant {
         super(PV_INITIAL);
     }
     public Color getCouleur() {
-        return COULEUR;
+        if(peutSeReproduire())
+            return new Color(255, 88, 0);
+        else
+            return COULEUR;
+    }
+
+    @Override
+    public boolean peutSeReproduire() {
+        return Math.random()*100>80;
     }
 }

@@ -36,7 +36,7 @@ public class Affichage extends JFrame implements ActionListener {
     private JMenuItem infoZoom = new JMenuItem("Zoom");
     private JSlider tailleCase = new JSlider(4,50,Plateau.tailleCase);
     private JMenuItem vivantsTimer = new JMenuItem("Changer le délai de mort");
-    private JSlider slideVitesse = new JSlider(1,100,50);
+    private JSlider slideVitesse = new JSlider(1,100,1);
     private JMenuItem cleanGraph = new JMenuItem("Nettoyer le graphique");
 //    private JCheckBoxMenuItem capturePix = new JCheckBoxMenuItem("Enregistrer la simulation");
     private JMenuItem textFPS = new JMenuItem("Vitesse d'affichage: T(s)");
@@ -172,7 +172,7 @@ public class Affichage extends JFrame implements ActionListener {
             Runtime.getRuntime().exec(new String[] {"java", "-Xmx100m", "-jar", nomJar.getPath(), "45"}); //ça évite que le programme prenne 1Go de RAM ...
             System.exit(0);
         } //merci à internet pour l'astuce !
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         //UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
         for (int i = 0; i < args.length; i++) {
             System.out.print(args[i]+" ");
@@ -182,7 +182,7 @@ public class Affichage extends JFrame implements ActionListener {
             System.out.println(Integer.parseInt(args[0]));
             new Affichage(Integer.parseInt(args[0]));
         }catch (Exception e){
-            new Affichage(20);
+            new Affichage(50);
         }
     }
 
@@ -203,7 +203,7 @@ public class Affichage extends JFrame implements ActionListener {
 
         if(e.getSource().equals(startStopSimul)){toggleSimulation();}
 
-        if(e.getSource().equals(plusDeVivants)){plateau.genererAlea(200,10, graphique);}
+        if(e.getSource().equals(plusDeVivants)){plateau.genererAlea(200,10, graphique);System.out.println("ajout de viants");}
         if(e.getSource().equals(moinsDeVivants)){plateau.supprAlea(100, graphique);}
         if(e.getSource().equals(resetVivants)){plateau.resetVivants();grille.repaint();}
 
@@ -221,7 +221,7 @@ public class Affichage extends JFrame implements ActionListener {
             System.out.println("Choix de Vitesse de mort");
             String reponse = JOptionPane.showInputDialog(
                     this,
-                    "Délai entre les pertes de PV (ms) :",
+                    "Délai entre les pertes de PV (ms) : (actuellement "+Vivant.DELAI_TIMER+"ms)",
                     "Paramètres",
                     JOptionPane.PLAIN_MESSAGE);
             try {

@@ -14,7 +14,7 @@ public class Vivant implements ActionListener {
     public Pos position;
 
     public static final Color COULEUR = new Color(64, 123, 67);
-    public static int DELAI_TIMER=7000;
+    public static int DELAI_TIMER=3000;
     public int pointsDeVie = 0;
 
     public Timer timer;
@@ -44,7 +44,8 @@ public class Vivant implements ActionListener {
         return position;
     }
 
-    public Color getCouleur() {return COULEUR;}
+    public Color getCouleur() {
+        return COULEUR;}
 
     /**
      * D&eacute;termine si le Vivant devra &ecirc;tre affich&eacute; et &eacute;ventuellement supprimm&eacute; le cas &eacute;ch&eacute;ant
@@ -77,5 +78,9 @@ public class Vivant implements ActionListener {
      */
     protected void vivre(){
         pointsDeVie-=1;
+    }
+
+    public boolean peutSeReproduire(){
+        return true;
     }
 }

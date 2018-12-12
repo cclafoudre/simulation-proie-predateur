@@ -33,7 +33,10 @@ public class Lapin extends Vivant{
         pointsDeNutrition-=1;
     }
     public Color getCouleur() {
-        return COULEUR;
+        if(peutSeReproduire())
+            return Color.gray;
+        else
+            return COULEUR;
     }
 
     @Override
@@ -42,5 +45,10 @@ public class Lapin extends Vivant{
             super.vivre();
         else
             jourSansManger();
+    }
+
+    @Override
+    public boolean peutSeReproduire() {
+        return pointsDeNutrition>1;
     }
 }
