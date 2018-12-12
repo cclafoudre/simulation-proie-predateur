@@ -3,28 +3,25 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Fen&ecirc;tre affichant une courbe de l'&eacute;volution des potions/lapins en fonction du temps.
  */
 public class Graph extends JPanel implements ActionListener { //il faudrait passer à g.drawPolyline();
     protected BufferedImage image;
-    //public int[] serieDonnee;
-    public int[] serieLapins;
-    public int[] seriePotirons;
+    public ArrayList<Integer> serieLapins;
+    public ArrayList<Integer> seriePotirons;
     public int zoomX=1;
-
-    private int longeur;
-    private int indexLapins=0;
-    private int indexPotirons=0;
+    int indexLap=0;
+    int indexPot=0;
 
     public Graph(int timeWindow) {
         super();
-        longeur = timeWindow;
+        seriePotirons= new ArrayList<>();
+        serieLapins= new ArrayList<>();
         //serieDonnee = new int[longeur];
-        serieLapins = new int[longeur];
-        seriePotirons = new int[longeur];
-        image = new BufferedImage(timeWindow*zoomX, 1000,BufferedImage.TYPE_USHORT_555_RGB);
         new Timer(32, this).start();
     }
 
@@ -33,95 +30,36 @@ public class Graph extends JPanel implements ActionListener { //il faudrait pass
      * @param valeur le nombre de lapins
      */
     public void addLapins(int valeur) {
-        new Thread(()->{
-            if(indexLapins<longeur-1){
-                serieLapins[indexLapins] = valeur;
-                try {
-                     tracerPoint(indexLapins, serieLapins, Lapin.COULEUR);
-                    effacerPoint(indexLapins+1, serieLapins);
-                    effacerPoint(indexLapins+2, serieLapins);
-                    effacerPoint(indexLapins+3, serieLapins);
-                    effacerPoint(indexLapins+4, serieLapins);
-                    effacerPoint(indexLapins+5, serieLapins);
-                    indexLapins++;
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    //System.out.println("lap(" + indexLapins + ")=" + serieLapins[indexLapins]);
-                }
-            }
-            else {
-                decaler(1);
-                addLapins(valeur);
-            }
-        }).start();
+        serieLapins.add(valeur);
+        indexLap+=1;
+        repaint();
     }
     /**
      * Rajoute une valeur de recensement des potirons dans l'historique &agrave; l'&eacute;cran.
      * @param valeur le nombre de potirons
      */
     public void addPotirons(int valeur) {
-        new Thread(()->{
-            if(indexPotirons<longeur-1){
-                seriePotirons[indexPotirons] = valeur;
-                try {
-                    tracerPoint(indexPotirons, seriePotirons, Potiron.COULEUR);
-                    effacerPoint(indexPotirons+1, seriePotirons);
-                    effacerPoint(indexPotirons+2, seriePotirons);
-                    effacerPoint(indexPotirons+3, seriePotirons);
-                    effacerPoint(indexPotirons+4, seriePotirons);
-                    effacerPoint(indexPotirons+5, seriePotirons);
-                    indexPotirons++;
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    //System.out.println("pot(" + indexPotirons + ")=" + seriePotirons[indexPotirons]);
-                }
-            }
-            else {
-                decaler(1);
-                addPotirons(valeur);
-            }
-        }).start();
-    }
-
-    private void tracerPoint(int index, int[] serieDonnee, Color couleur) {
-        image.setRGB(index * zoomX, image.getHeight()-1 - serieDonnee[index], couleur.getRGB());
-    }
-    private void effacerPoint(int x, int[] serieDonnee) {try {
-        image.setRGB(x * zoomX, image.getHeight() - 1 - serieDonnee[x], new Color(0, 0, 0).getRGB());
-    }catch (ArrayIndexOutOfBoundsException e){}
+        seriePotirons.add(valeur);
+        indexPot+=1;
     }
 
     /**
      * Remet &agrave; z&eacute;ro le graphique pour effacer les pixels erron&eacute;s qui apparaissent de temps en temps.
      */
     public void clean() {
-        image.flush();
-        image=null;
-        image = new BufferedImage(longeur*zoomX, 1000,BufferedImage.TYPE_USHORT_555_RGB);
-        indexLapins=0;
-        indexPotirons=0;
+
     }
 
-    private void decaler(int n) {
-        /*int[] nouveau = new int[longeur];
-        for (int i = nouveau.length - 1; i > n; i -= 1) {
-            nouveau[i - n] = serieDonnee[i];
-        }
-        index = longeur - 1 - n;
-        serieDonnee = nouveau;
-        nouveau = null;*/
-        //index=0; //en fait tracer juste avant le précédent ça va ...
-        indexLapins=0;
-        indexPotirons=0;
-    }
-
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        if(image != null)
-        {
-            g.drawImage(image,
-                    (getWidth()-image.getWidth())/2,
-                    (getHeight()-image.getHeight())/2,
-                    null);
-        }
+    public void paint(Graphics g){
+        g.setColor(Color.black);
+        g.fillRect(seriePotirons.get(indexPot-1),seriePotirons.get(indexLap-1), 2,2);
+        g.setColor(Color.red);
+        int[] serP = convertArray(seriePotirons);
+        int[] serL = convertArray(serieLapins);
+        g.drawPolyline(serP, serL, Math.min(serieLapins.size(), seriePotirons.size()));
+        /*int[] a =new int[]{50,100,20,60};
+        int[] b =new int[]{90,300,80,60};
+        g.drawPolyline(a,b,3);*/
     }
 
     /**
@@ -131,8 +69,7 @@ public class Graph extends JPanel implements ActionListener { //il faudrait pass
      * @param hauteur
      */
     public void setSize(int largeur, int hauteur){
-        longeur = largeur;
-        image = new BufferedImage(longeur*zoomX, hauteur,BufferedImage.TYPE_INT_RGB);
+        super.setSize(largeur, hauteur);
     }
 
     /**
@@ -169,5 +106,16 @@ public class Graph extends JPanel implements ActionListener { //il faudrait pass
     @Override
     public void actionPerformed(ActionEvent e) {
         repaint();
+    }
+
+    private int[] convertArray(ArrayList<Integer> arrayList){
+        int[] array=new int[arrayList.size()];
+        Iterator<Integer> it = arrayList.iterator();
+        int index=0;
+        while (it.hasNext()) {
+            array[index] = it.next();
+            index += 1;
+        }
+        return array;
     }
 }
