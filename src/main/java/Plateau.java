@@ -17,7 +17,6 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
     private Timer perfTimer = new Timer(1000, this);
     private int perfCompteur = 0;
     private Grille display;
-    private Graph graph;
     private Timer simulTimer;
 
     /**
@@ -26,7 +25,7 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
      *                       On lui passe la r&eacute;f&eacute;rence car il faut ce tableau pour initialiser {@link Grille}
      * @param affichage une {@link Grille}
      */
-    public Plateau(Vivant[][] tableauVivants, Grille affichage, Graph graph) {
+    public Plateau(Vivant[][] tableauVivants, Grille affichage) {
         super();
         this.taille = tableauVivants.length;
         simulTimer = new Timer(1, new ActionListener() {
@@ -38,7 +37,6 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
         simulation = tableauVivants;
         display=affichage;
         display.addEditListener(this);
-        this.graph=graph;
         new Thread(()->{
             try {
                 Thread.sleep(500);
@@ -186,7 +184,7 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
         ajouterVivant(ilVaBouger, newPos);
     }
 
-    public void genererAlea(int nbrePotiron, int nbreLapins, Graph graph) {
+    public void genererAlea(int nbrePotiron, int nbreLapins) {
         final int[] nP = {0};
         final int[] nL = {0};
         Thread safe = new Thread(() -> {
@@ -205,7 +203,6 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
             Pos pos = getRandomVide();
             if (selectVivant(pos) == null) {
                 ajouterVivant(new Potiron(), pos);
-                graph.addPotirons(getNbrePotirons());
                 nP[0] += 1;
             }
         }
@@ -213,7 +210,6 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
             Pos pos = Pos.getRandomPos(taille);
             if (Pos.getTab(simulation, pos) == null) {
                 ajouterVivant(new Lapin(), pos);
-                graph.addLapins(getNbreLapins());
                 nL[0] += 1;
             }
         }
@@ -221,7 +217,7 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
         //System.out.println("Génération de vivants terminée");
     }
 
-    public void supprAlea(int nombre, Graph graph) {
+    public void supprAlea(int nombre) {
         int total=(getNbrePotirons()+getNbreLapins());
         if(nombre>=total) {
             resetVivants();
@@ -233,8 +229,6 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
                 Pos pos = Pos.getRandomPos(taille);
                 if (Pos.getTab(simulation, pos) != null) {
                     enleverVivant(pos);
-                    graph.addLapins(getNbreLapins());
-                    graph.addPotirons(getNbrePotirons());
                     nbVivants +=1;
                 }
             }
@@ -338,8 +332,6 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
     @Override
     public void run() {
         simuler();
-        graph.addLapins(getNbreLapins());
-        graph.addPotirons(getNbrePotirons());
     }
 
     @Override

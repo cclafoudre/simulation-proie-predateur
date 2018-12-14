@@ -5,7 +5,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,14 +12,16 @@ import java.net.URISyntaxException;
 /**
  * Classe pour lancer le programme. Il y a dedans tous les contr&ocirc;les, et c'est elle qui poss&egrave;de et g&egrave;re les objets
  * {@link Grille} (affichage du plateau de simulation),
- * {@link Graph} (affiche l'&eacute;volution dans le temps des populations)
+ * {@link Graphique} (affiche l'&eacute;volution dans le temps des populations)
  * et {@link Plateau} (logique m&eacute;tier des tours de simulation, n'effectue aucun affichage)
  */
 public class Affichage extends JFrame implements ActionListener {
     private Vivant[][] simulation;
     private Plateau plateau;
     private Grille grille;
-    private Graph graphique;
+    private Graphique graphique;
+
+    Timer updateGraph = new Timer(100, this);
 
     private JMenuBar barreMenus = new JMenuBar();
     private JMenu actions = new JMenu("Actions");
@@ -54,11 +55,11 @@ public class Affichage extends JFrame implements ActionListener {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(800,850);
         setTitle("Simluation Proie-prédateur");
-        setLocationRelativeTo(null);
+        setLocation(-100,200);//setLocationRelativeTo(null);
 
         grille = new Grille(simulation);
-        graphique = Graph.lancer();
-        plateau = new Plateau(simulation, grille, graphique);
+        graphique = new Graphique();
+        plateau = new Plateau(simulation, grille);
         plateau.setDisplay(grille);
 
         setContentPane(grille);
@@ -159,8 +160,9 @@ public class Affichage extends JFrame implements ActionListener {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            plateau.genererAlea(1000,50, graphique);
+            plateau.genererAlea(1000,50);
         }).start();
+        updateGraph.start();
         //JOptionPane.showMessageDialog(null,new JLabel("Veuillez lancer la simulation depuis le menu Simulation > Lancer"),"Task failed successfully !",JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -196,15 +198,15 @@ public class Affichage extends JFrame implements ActionListener {
             //}).start();
             //effectuer un tour
         }
-        if(e.getSource().equals(cleanGraph)){graphique.clean();}
+        if(e.getSource().equals(cleanGraph)){}
         if(e.getSource().equals(autofit)) {
             tailleCase.setValue(grille.autoFit());
         }
 
         if(e.getSource().equals(startStopSimul)){toggleSimulation();}
 
-        if(e.getSource().equals(plusDeVivants)){plateau.genererAlea(200,10, graphique);System.out.println("ajout de viants");}
-        if(e.getSource().equals(moinsDeVivants)){plateau.supprAlea(100, graphique);}
+        if(e.getSource().equals(plusDeVivants)){plateau.genererAlea(200,10);System.out.println("ajout de viants");}
+        if(e.getSource().equals(moinsDeVivants)){plateau.supprAlea(100);}
         if(e.getSource().equals(resetVivants)){plateau.resetVivants();grille.repaint();}
 
         /*if(e.getSource().equals(capturePix)){plateau.toggleCapture();}
@@ -246,15 +248,26 @@ public class Affichage extends JFrame implements ActionListener {
             mPotiron.setSelected(false);
             mLapin.setSelected(false);
         }
+        if(e.getSource().equals(updateGraph)){
+            if(plateau.isSimulationActive()){
+                graphique.addLapins(plateau.getNbreLapins());
+                graphique.addPotirons(plateau.getNbrePotirons());
+            }
+            graphique.repaint();
+        }
     }
     public void setSize(int largeur, int hauteur){
         super.setSize(largeur, hauteur);
     }
     private void toggleSimulation(){
-        if(plateau.isSimulationActive())
+        if(plateau.isSimulationActive()) {
             plateau.stopSimulation();
-        else
+            updateGraph.stop();
+        }
+        else {
             plateau.startSimulation();
+            updateGraph.start();
+        }
     }
 }
 class Icone implements Icon{

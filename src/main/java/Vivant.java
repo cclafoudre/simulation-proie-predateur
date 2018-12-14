@@ -14,7 +14,7 @@ public class Vivant implements ActionListener {
     public Pos position;
 
     public static final Color COULEUR = new Color(64, 123, 67);
-    public static int DELAI_TIMER=3000;
+    public static int DELAI_TIMER=1500;
     public int pointsDeVie = 0;
 
     public Timer timer;
