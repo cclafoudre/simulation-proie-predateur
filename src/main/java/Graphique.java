@@ -30,6 +30,11 @@ public class Graphique extends JPanel {
 
     private int height;
     private int width;
+    int resolution=9;
+
+    private Pos curseur=new Pos(-10,-10);
+    private int curseurCompteur=0;
+
     public Graphique(){
         lapins = new ArrayList<>();
         potirons = new ArrayList<>();
@@ -43,12 +48,15 @@ public class Graphique extends JPanel {
 
         addMouseMotionListener(new MouseMotionListener() {
             @Override
-            public void mouseDragged(MouseEvent e) {
-                repaint();
-            }
+            public void mouseDragged(MouseEvent e) {mouseMoved(e);}
 
             @Override
             public void mouseMoved(MouseEvent e) {
+                Graphics g = getGraphics();
+                curseurCompteur=20;
+                //dessinerCurseur(g,e.getX(), e.getY(), getHeight(), getWidth());
+                curseur=new Pos(e.getX(),e.getY());
+                repaint();
             }
         });
         f.setVisible(true);
@@ -84,7 +92,8 @@ public class Graphique extends JPanel {
         convertArrays();
 
         g.setColor(Color.BLACK);
-        g.fillRect(0,0,width, height);
+        g.fillRect(0,0,getWidth(), getHeight());
+        //g.fillRect(0,0,width, height);
 
         g.setColor(Lapin.COULEUR);
         g.drawPolyline(xL, lapinsY, xL.length);
@@ -101,7 +110,11 @@ public class Graphique extends JPanel {
         g.drawLine(2,0,2,height);
         g.drawLine(0,height-2,width,height-2);
 
-        drawAxes(g,height,width,2,2,9);
+        drawAxes(g,height,width,2,2);
+
+        if(curseurCompteur>0) {
+            dessinerCurseur(g, curseur.X, curseur.Y, height, width);
+        }
     }
     public void setSize(int x, int y){
         super.setSize(x,y);
@@ -164,7 +177,7 @@ public class Graphique extends JPanel {
         }
     }
 
-    private void drawAxes(Graphics2D g, int height, int width, int x0, int y0, int resolution){
+    private void drawAxes(Graphics2D g, int height, int width, int x0, int y0){
         g.setColor(Color.white);
         g.drawString("0",x0+3,height-4);
         for (int n = 1; n <= resolution; n++) {
@@ -180,4 +193,11 @@ public class Graphique extends JPanel {
         }
     }
 
+    private void dessinerCurseur(Graphics g, int x, int y, int height, int width){
+        g.setColor(Color.red);
+        g.drawLine(0,y,width,y);
+        g.drawLine(x, height, x, 0);
+        g.drawString("x="+x*maxPotirons/width+" y="+(height-y)*maxLapins/height, x, y);
+        curseurCompteur-=1;
+    }
 }
