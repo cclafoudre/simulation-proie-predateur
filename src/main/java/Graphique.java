@@ -20,6 +20,7 @@ public class Graphique extends JPanel {
     protected int maxLapins; //défini à l'entrée
     protected int maxPotirons;
     protected int maxGraph; //max pour afficher les deux courbes de population
+    protected int maxLP=0;
     private int[] tabLap;
     private int[] tabPot;
 
@@ -35,17 +36,15 @@ public class Graphique extends JPanel {
     private Pos curseur=new Pos(-10,-10);
     private int curseurCompteur=0;
 
+    protected boolean afficheCoubeCyan=true;
+    public static boolean COURBE_BLEUE=true;
+    public static boolean DEUX_COURBES=false;
+
+    public Graphique chaine;
+
     public Graphique(){
         lapins = new ArrayList<>();
         potirons = new ArrayList<>();
-        JFrame f = new JFrame("Graphique des lapins en fonction des potirons");
-        f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        //f.setLocation(-700,1000);
-        f.setLocationRelativeTo(null);
-        f.setSize(500,500);
-        f.setBackground(Color.black);
-        f.add(this);
-
         addMouseMotionListener(new MouseMotionListener() {
             @Override
             public void mouseDragged(MouseEvent e) {mouseMoved(e);}
@@ -54,12 +53,42 @@ public class Graphique extends JPanel {
             public void mouseMoved(MouseEvent e) {
                 Graphics g = getGraphics();
                 curseurCompteur=20;
-                //dessinerCurseur(g,e.getX(), e.getY(), getHeight(), getWidth());
                 curseur=new Pos(e.getX(),e.getY());
                 repaint();
             }
         });
+        lapins.size();
+    }
+    public static Graphique nouvelleFenetre() {
+        JFrame f = new JFrame("Graphique des lapins en fonction des potirons");
+        Graphique graphique = new Graphique();
+        fenetre(graphique);
+        return graphique;
+    }
+    public static JFrame fenetre(Graphique graphique){
+        JFrame f;
+        if(graphique.afficheCoubeCyan)
+            f = new JFrame("Graphique des lapins en fonction des potirons");
+        else
+            f = new JFrame("Graphique des lapins et des potirons en fonction du temps");
+        f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        f.setLocationRelativeTo(null);
+        f.setSize(500,500);
+        f.setBackground(Color.black);
+        f.add(graphique);
         f.setVisible(true);
+        return f;
+    }
+    public void setTypeAffichage(boolean b){
+        afficheCoubeCyan=b;
+    }
+    public void setChaineDeGraphique(Graphique that){
+        chaine=that;
+    }
+    public void repaint(){
+        super.repaint();
+        if(chaine!=null)
+            chaine.repaint();
     }
 
     public void addLapins(int n){
@@ -69,6 +98,8 @@ public class Graphique extends JPanel {
             if(n>maxGraph)
                 maxGraph=n;
         }
+        if(chaine!=null)
+            chaine.addLapins(n);
     }
     public void addPotirons(int n) {
         potirons.add(Math.abs(n));
@@ -77,12 +108,16 @@ public class Graphique extends JPanel {
             if(n>maxGraph)
                 maxGraph=n;
         }
+        if(chaine!=null)
+            chaine.addPotirons(n);
     }
 
     /**
      * y=(hauteur-y), x=x
      */
     public void paint(Graphics g0){
+        if(lapins.size()<1)
+            return;
         Graphics2D g = (Graphics2D) g0;
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
@@ -93,18 +128,19 @@ public class Graphique extends JPanel {
 
         g.setColor(Color.BLACK);
         g.fillRect(0,0,getWidth(), getHeight());
-        //g.fillRect(0,0,width, height);
 
-        g.setColor(Lapin.COULEUR);
-        g.drawPolyline(xL, lapinsY, xL.length);
-        g.setColor(Potiron.COULEUR);
-        g.drawPolyline(xP, potironsY, xP.length);
-
-        g.setColor(Color.cyan);
-        g.drawPolyline(tabPot, tabLap, tabLap.length);
-
-        g.setColor(Color.red);
-        g.fillRect(tabPot[tabPot.length-1], tabLap[tabLap.length-1], 8,8);
+        if(afficheCoubeCyan) {
+            g.setColor(Color.cyan);
+            g.drawPolyline(tabPot, tabLap, tabLap.length);
+            g.setColor(Color.red);
+            g.fillRect(tabPot[tabPot.length-1], tabLap[tabLap.length-1], 8,8);
+        }
+        else {
+            g.setColor(Lapin.COULEUR);
+            g.drawPolyline(xL, lapinsY, xL.length);
+            g.setColor(Potiron.COULEUR);
+            g.drawPolyline(xP, potironsY, xP.length);
+        }
 
         g.setColor(Color.green);
         g.drawLine(2,0,2,height);
@@ -124,7 +160,7 @@ public class Graphique extends JPanel {
     private void convertArrays() {
         //lapins.trimToSize();
         //potirons.trimToSize();
-        int maxLP = Math.min(lapins.size(), potirons.size()); //les deux listes doivent avoir la meme taille
+        maxLP = Math.min(lapins.size(), potirons.size()); //les deux listes doivent avoir la meme taille
         Integer[] arrayLapins = new Integer[maxLP];
         Integer[] arrayPotirons = new Integer[maxLP];
         lapins.subList(0, maxLP).toArray(arrayLapins); //on convertit les ArrayList en Array
@@ -137,21 +173,14 @@ public class Graphique extends JPanel {
         lapinsY=new int[maxLP];
 
         for (int y = 0; y < arrayLapins.length; y++) { //on convertit les positions X (pot) et Y (lap) dans un tableau
-            /*tabLap[y] = convertLap(arrayLapins[y]);
-            xL[y]=y*width/(maxLP-1);
-            lapinsY[y]=height-arrayLapins[y]*(height/maxGraph);*/
             tabLap[y]=height-map(arrayLapins[y],0,maxLapins,5,height-5);
             xL[y]=map(y,0,maxLP,5,width-5);
             lapinsY[y]=height-map(arrayLapins[y],0,maxGraph,5,height-5);
         }
         for (int x = 0; x < arrayPotirons.length; x++) {
-            tabPot[x] = width-map(arrayPotirons[x],0,maxPotirons,5,width-5);
+            tabPot[x] = map(arrayPotirons[x],0,maxPotirons,5,width-5);
             potironsY[x]=height-map(arrayPotirons[x],0,maxGraph,5,height-5);
             xP[x]=map(x,0,maxLP,5,width-5);
-/*
-            tabPot[x] = convertPot(arrayPotirons[x]);
-            potironsY[x]=height-arrayPotirons[x]*(height/maxGraph);
-            xP[x]=x*width/(maxLP-1);*/
         }
     }
     public int map(int x, int in_min, int in_max, int out_min, int out_max)
@@ -167,7 +196,7 @@ public class Graphique extends JPanel {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        Graphique g = new Graphique();
+        Graphique g = Graphique.nouvelleFenetre();
         for (int i = 0; i < 1000; i++) {
             g.addPotirons(30+(int)(20*Math.sin(0.1*i)+500*Math.sin(0.001*i)));
             g.addLapins(20+(int)(20*Math.cos(0.1*i)+500*Math.sin(0.01*i)));
@@ -180,6 +209,17 @@ public class Graphique extends JPanel {
     private void drawAxes(Graphics2D g, int height, int width, int x0, int y0){
         g.setColor(Color.white);
         g.drawString("0",x0+3,height-4);
+        if(afficheCoubeCyan){
+            g.drawString("nLapins=f(nPotirons)", 30,15);
+            g.drawString("nPotirons", width - 60, height - 17);
+
+        }else {
+            g.drawString("itérations", width  -60, height - 17);
+            g.setColor(Lapin.COULEUR);
+            g.drawString("nLapins=f(itérations)", 30, 15);
+            g.setColor(Potiron.COULEUR);
+            g.drawString("nPotirons=f(itérations)", 30, 30);
+        }
         for (int n = 1; n <= resolution; n++) {
             int x=map(n,0,resolution,x0,width);
             int y = map(n,0,resolution,y0,height);
@@ -188,8 +228,14 @@ public class Graphique extends JPanel {
             g.fillRect(x0-3,height-y,10,3); //ordonnées
 
             g.setColor(Color.white);
-            g.drawString(n*maxPotirons/resolution+"",x+4,height-4); //on affiche les numéros des abscicsses
-            g.drawString(n*maxLapins/resolution+"",x0+2,height-y-4); //idem pour odrinneée
+            if(afficheCoubeCyan) {
+                g.drawString(n * maxPotirons / resolution + "", x + 4, height - 4); //on affiche les numéros des abscicsses
+                g.drawString(n * maxLapins / resolution + "", x0 + 2, height - y - 4); //idem pour odrinneée
+            }
+            else {
+                g.drawString(n * maxLP / resolution + "", x + 4, height - 4); //on affiche les numéros des abscicsses
+                g.drawString(n * maxGraph / resolution + "", x0 + 2, height - y - 4); //idem pour odrinneée
+            }
         }
     }
 
@@ -197,7 +243,18 @@ public class Graphique extends JPanel {
         g.setColor(Color.red);
         g.drawLine(0,y,width,y);
         g.drawLine(x, height, x, 0);
-        g.drawString("x="+x*maxPotirons/width+" y="+(height-y)*maxLapins/height, x, y);
+        if(afficheCoubeCyan)
+            g.drawString("x="+x*maxPotirons/width+" y="+(height-y)*maxLapins/height, x, y);
+        else
+            g.drawString("x="+x*maxLP/width+" y="+(height-y)*maxGraph/height, x, y);
         curseurCompteur-=1;
+    }
+    public void vider(){
+        lapins.removeAll(lapins);
+        potirons.removeAll(potirons);
+        maxLP=1;
+        maxGraph=1;
+        maxLapins=1;
+        maxPotirons=1;
     }
 }

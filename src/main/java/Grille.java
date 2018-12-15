@@ -30,6 +30,7 @@ public class Grille  extends JPanel implements Runnable, MouseListener, MouseMot
         //fps.start();
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
+        setMinimumSize(new Dimension(300,300));
     }
 
     /**
@@ -71,14 +72,7 @@ public class Grille  extends JPanel implements Runnable, MouseListener, MouseMot
      * @param ici le vivant &agrave; afficher
      */
     public void dessineCase(Pos pos, Vivant ici){
-        Graphics g = getGraphics();
         dessineCase(pos.getX(), pos.getY(), ici);
-        if (ici == null)
-            g.setColor(Vivant.COULEUR);
-        else
-            g.setColor(ici.getCouleur());
-        Pos px = pos.toPixels(getWidth(), getHeight(), taille, tailleCase);
-        g.fillRect(px.X, px.Y, tailleCase-2, tailleCase-2);
     }
     /**
      * Dessine une seule case sur la grille sans se pr&eacute;occuper de rafra&icirc;chir l'affichache (c'est pour &ccedil;a que les cases nouvellement dessin&eacute;es se superposent aux menus
@@ -87,9 +81,8 @@ public class Grille  extends JPanel implements Runnable, MouseListener, MouseMot
      * @param ici le Vivant &agrave; afficher. peut &ecirc;tre "null" (case vide)
      */
     public void dessineCase(int x, int y, Vivant ici) {
-        if(isSingleRefresh())
-            return;
-        dessineCase(x,y,ici,getGraphics());
+        if(!isSingleRefresh() && isVisible())
+            dessineCase(x,y,ici,getGraphics());
     }
 
 

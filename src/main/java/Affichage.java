@@ -5,9 +5,13 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 /**
  * Classe pour lancer le programme. Il y a dedans tous les contr&ocirc;les, et c'est elle qui poss&egrave;de et g&egrave;re les objets
@@ -19,9 +23,16 @@ public class Affichage extends JFrame implements ActionListener {
     private Vivant[][] simulation;
     private Plateau plateau;
     private Grille grille;
+
     private Graphique graphique;
+    private Graphique lapinsPotironsG2;
+    private JFrame gf1;
+    private JFrame gf2;
 
     Timer updateGraph = new Timer(100, this);
+
+    private JSplitPane graphs;
+    private JSplitPane vue;
 
     private JMenuBar barreMenus = new JMenuBar();
     private JMenu actions = new JMenu("Actions");
@@ -38,38 +49,48 @@ public class Affichage extends JFrame implements ActionListener {
     private JSlider tailleCase = new JSlider(4,50,Plateau.tailleCase);
     private JMenuItem vivantsTimer = new JMenuItem("Changer le délai de mort");
     private JSlider slideVitesse = new JSlider(1,100,1);
-    private JMenuItem cleanGraph = new JMenuItem("Nettoyer le graphique");
 //    private JCheckBoxMenuItem capturePix = new JCheckBoxMenuItem("Enregistrer la simulation");
     private JMenuItem textFPS = new JMenuItem("Vitesse d'affichage: T(s)");
     private JCheckBoxMenuItem singleRefresh = new JCheckBoxMenuItem("Rafraîchir tout le plateau");
     private JSlider slideFPS = new JSlider(1,60,30);
     private JMenuItem autofit = new JMenuItem("Ajuster la taille automatiquement");
+    private JMenuItem resetDisposition = new JMenuItem("Réinitialiser la disposition");
 
     private JMenu simulMenu = new JMenu("Simulation");
     private JMenuItem boutonAction = new JMenuItem("Simuler un tour");
     private JMenuItem startStopSimul = new JMenuItem("Démarrer/arrêter la simulation");
 
+    private JMenu graphControl = new JMenu("Graphiques");
+    private JCheckBoxMenuItem lapPotFenetre = new JCheckBoxMenuItem("Graphique Lapins&Potirons dans une fenêtre séparée");
+    private JCheckBoxMenuItem lapFpotFenetre = new JCheckBoxMenuItem("Graphique Lapins=f(Potirons) dans une fenêtre séparée");
+    private JMenuItem cleanLapPot = new JMenuItem("Réintialiser le graphique des lapins & potirons");
+    private JMenuItem cleanLapFpot = new JMenuItem("Réinitialiser le graphique cyan : lapins=f(potirons)");
+
     public Affichage(int taille){
         super();
         simulation = new Vivant[taille][taille];
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setSize(800,850);
+        setSize(1200,850);
         setTitle("Simluation Proie-prédateur");
-        setLocation(-100,200);//setLocationRelativeTo(null);
+        setLocationRelativeTo(null);
 
         grille = new Grille(simulation);
-        graphique = new Graphique();
+
+        graphique = new Graphique();//Graphique.nouvelleFenetre();
+        graphique.setTypeAffichage(Graphique.DEUX_COURBES);
+        lapinsPotironsG2 = new Graphique();
+        graphique.setChaineDeGraphique(lapinsPotironsG2);
+
         plateau = new Plateau(simulation, grille);
         plateau.setDisplay(grille);
 
-        setContentPane(grille);
+        //setContentPane(grille);
 
         boutonAction.addActionListener(this);
         startStopSimul.addActionListener(this);
         vivantsTimer.addActionListener(this);
         plusDeVivants.addActionListener(this);
         moinsDeVivants.addActionListener(this);
-        cleanGraph.addActionListener(this);
         resetVivants.addActionListener(this);
 //        capturePix.addActionListener(this);
 //        genVid.addActionListener(this);
@@ -77,6 +98,12 @@ public class Affichage extends JFrame implements ActionListener {
         mPotiron.addActionListener(this);
         mVide.addActionListener(this);
         autofit.addActionListener(this);
+        resetDisposition.addActionListener(this);
+        singleRefresh.addActionListener(this);
+        lapFpotFenetre.addActionListener(this);
+        lapPotFenetre.addActionListener(this);
+        cleanLapFpot.addActionListener(this);
+        cleanLapPot.addActionListener(this);
 
         startStopSimul.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
         boutonAction.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
@@ -113,7 +140,6 @@ public class Affichage extends JFrame implements ActionListener {
                 textFPS.setText("Vitesse d'affichage (T="+hz+" s");
             }
         });
-        singleRefresh.addActionListener(this);
 
         affichage.add(infoZoom);
         affichage.add(tailleCase);
@@ -124,8 +150,7 @@ public class Affichage extends JFrame implements ActionListener {
         affichage.add(slideFPS);
         affichage.add(singleRefresh);
         affichage.add(new JSeparator());
-        affichage.add(cleanGraph);
-        barreMenus.add(affichage);
+        affichage.add(resetDisposition);
 
         simulMenu.add(boutonAction);
         simulMenu.add(startStopSimul);
@@ -147,12 +172,37 @@ public class Affichage extends JFrame implements ActionListener {
         actions.add(mPotiron);
         actions.add(mVide);
 
+        graphControl.add(lapPotFenetre);
+        graphControl.add(lapFpotFenetre);
+        graphControl.add(cleanLapPot);
+        graphControl.add(cleanLapFpot);
+
+        barreMenus.add(affichage);
         barreMenus.add(simulMenu);
         barreMenus.add(actions);
+        barreMenus.add(graphControl);
         //barreMenus.add(boutonStart);
         //barreMenus.add(boutonStop);
         setJMenuBar(barreMenus);
 
+        /*graphs = new JTabbedPane();
+        graphs.addTab("Potirons & Lapins séparés",graphique);
+        graphs.addTab("lapins=f(Potirons)", lapinsPotironsG2);*/
+        graphs= new JSplitPane(JSplitPane.VERTICAL_SPLIT);graphs.setDividerLocation(getHeight()/3);graphs.setContinuousLayout(true);
+        graphs.add(graphique,0);
+        graphs.add(lapinsPotironsG2,1);
+        vue = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        vue.add(grille);
+        vue.add(graphs);
+        vue.setDividerLocation(getWidth()/2);
+        vue.setContinuousLayout(true);
+        vue.addPropertyChangeListener(new PropertyChangeListener() { //pour que la grille se mette toute seule à la meilleure taille quand on déplace le slider
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                tailleCase.setValue(grille.autoFit());
+            }
+        });
+        add(vue);
         setVisible(true);
         new Thread(()->{
             try {
@@ -163,6 +213,7 @@ public class Affichage extends JFrame implements ActionListener {
             plateau.genererAlea(1000,50);
         }).start();
         updateGraph.start();
+        grille.autoFit();
         //JOptionPane.showMessageDialog(null,new JLabel("Veuillez lancer la simulation depuis le menu Simulation > Lancer"),"Task failed successfully !",JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -176,16 +227,21 @@ public class Affichage extends JFrame implements ActionListener {
         } //merci à internet pour l'astuce !
         //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         //UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+
+        /*MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = null;*/
+        Affichage mbean;
         for (int i = 0; i < args.length; i++) {
             System.out.print(args[i]+" ");
             System.out.println(Integer.parseInt(args[i]));
         }
         try{
             System.out.println(Integer.parseInt(args[0]));
-            new Affichage(Integer.parseInt(args[0]));
+            mbean=new Affichage(Integer.parseInt(args[0]));
         }catch (Exception e){
-            new Affichage(50);
+            mbean=new Affichage(50);
         }
+        System.out.println("Lancement ...");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -198,7 +254,6 @@ public class Affichage extends JFrame implements ActionListener {
             //}).start();
             //effectuer un tour
         }
-        if(e.getSource().equals(cleanGraph)){}
         if(e.getSource().equals(autofit)) {
             tailleCase.setValue(grille.autoFit());
         }
@@ -254,6 +309,40 @@ public class Affichage extends JFrame implements ActionListener {
                 graphique.addPotirons(plateau.getNbrePotirons());
             }
             graphique.repaint();
+        }
+        if(e.getSource().equals(lapFpotFenetre)){
+            if(lapFpotFenetre.getState()){
+                graphs.remove(lapinsPotironsG2);
+                gf1=Graphique.fenetre(lapinsPotironsG2);
+            }
+            else {
+                gf1.dispose();
+                graphs.add(lapinsPotironsG2,0);
+                graphs.setDividerLocation(getHeight()/3);
+            }
+        }
+        if(e.getSource().equals(lapPotFenetre)){
+            if(lapPotFenetre.getState()){
+                graphs.remove(graphique);
+                gf2=Graphique.fenetre(graphique);
+            }else {
+                gf2.dispose();
+                graphs.add(graphique,1);
+                graphs.setDividerLocation(getHeight()/3);
+            }
+        }
+        if(e.getSource().equals(resetDisposition)){
+            vue.setDividerLocation(getWidth()/2);
+            graphs.setDividerLocation(getHeight()/3);
+            vue.updateUI();
+            graphs.updateUI();
+            repaint();
+        }
+        if(e.getSource().equals(cleanLapPot)){
+            graphique.vider();
+        }
+        if(e.getSource().equals(cleanLapFpot)){
+            lapinsPotironsG2.vider();
         }
     }
     public void setSize(int largeur, int hauteur){
