@@ -1,3 +1,4 @@
+import javax.management.*;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -11,7 +12,6 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 
 /**
  * Classe pour lancer le programme. Il y a dedans tous les contr&ocirc;les, et c'est elle qui poss&egrave;de et g&egrave;re les objets
@@ -228,18 +228,32 @@ public class Affichage extends JFrame implements ActionListener {
         //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         //UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
 
-        /*MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name = null;*/
-        Affichage mbean;
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        Affichage af;
         for (int i = 0; i < args.length; i++) {
             System.out.print(args[i]+" ");
             System.out.println(Integer.parseInt(args[i]));
         }
         try{
             System.out.println(Integer.parseInt(args[0]));
-            mbean=new Affichage(Integer.parseInt(args[0]));
+            af=new Affichage(Integer.parseInt(args[0]));
         }catch (Exception e){
-            mbean=new Affichage(50);
+            af=new Affichage(50);
+        }
+        try {
+            mbs.registerMBean(af.plateau, new ObjectName("org.jeanribes.simulation-proie-predateur:type=PlateauMBean"));
+
+            System.out.println("Lancement ...");
+        } catch (MalformedObjectNameException e) {
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        } catch (InstanceAlreadyExistsException e) {
+            e.printStackTrace();
+        } catch (MBeanRegistrationException e) {
+            e.printStackTrace();
+        } catch (NotCompliantMBeanException e) {
+            e.printStackTrace();
         }
         System.out.println("Lancement ...");
     }

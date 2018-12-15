@@ -8,7 +8,7 @@ import java.util.Random;
  * N&eacute;cessite un objet {@link Grille} pour l'affichage, &agrave; d&eacute;finir avec {@link Plateau#setDisplay(Grille)} car les deux classes ont des d&eacute;pendances mutuelles.
  * L'attribut {@link Plateau#SIMULATION_ACTIVE} permet d'arr&ecirc;ter les boucles "while" encore en cours lors de l'arr&ecirc;t de la simulation, par exempe quand il n'y a plus de vivants
  */
-public class Plateau extends Thread implements ActionListener, Grille.EditListener {
+public class Plateau extends Thread implements ActionListener, Grille.EditListener, PlateauMBean {
     public static boolean SIMULATION_ACTIVE;
     public Vivant[][] simulation;
     public static int tailleCase = 15;
@@ -16,6 +16,7 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
 
     private Timer perfTimer = new Timer(1000, this);
     private int perfCompteur = 0;
+    public int iterationsseconde;
     private Grille display;
     private Timer simulTimer;
 
@@ -217,6 +218,16 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
         //System.out.println("Génération de vivants terminée");
     }
 
+    @Override
+    public int getTaille() {
+        return taille;
+    }
+
+    @Override
+    public int getIterationSeconde() {
+        return iterationsseconde;
+    }
+
     public void supprAlea(int nombre) {
         int total=(getNbrePotirons()+getNbreLapins());
         if(nombre>=total) {
@@ -256,6 +267,47 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
         }
         return n;
     }
+
+    @Override
+    public int getTimerMortVivants() {
+        return Vivant.DELAI_TIMER;
+    }
+
+    @Override
+    public void setTimerMortVivants(int ms) {
+        setMortDelay(ms);
+    }
+
+    @Override
+    public int getPVinitLapin() {
+        return Lapin.PV_INITIAL;
+    }
+
+    @Override
+    public int getPVinitPotiron() {
+        return Potiron.PV_INITIAL;
+    }
+
+    @Override
+    public void setPVinitPotiron(int pv) {
+        Potiron.PV_INITIAL=pv;
+    }
+
+    @Override
+    public void setPVinitLapin(int pv) {
+        Lapin.PV_INITIAL=pv;
+    }
+
+    @Override
+    public int getPotironReproduction() {
+        return Potiron.CHANCE_REPRODUCTION;
+    }
+
+    @Override
+    public void setPotironReproduction(int chances) {
+        Potiron.CHANCE_REPRODUCTION=chances;
+    }
+
     public int getNbreLapins() {
         int n = 0;
         for (int y = 0; y < simulation.length; y++) {
@@ -272,6 +324,7 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
         if(SIMULATION_ACTIVE){
             System.out.println(perfCompteur +" itérations/seconde");
             display.afficherTexte(perfCompteur +" itérations/seconde");
+            iterationsseconde=perfCompteur;
             perfCompteur =0;
         }
     }
