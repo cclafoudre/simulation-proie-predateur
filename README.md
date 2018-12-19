@@ -1,7 +1,15 @@
 # simulation-proie-predateur
 projet d'info 2A INSA
 
-##
+## Consignes
+* rendu le mardi 8 janvier
+* donner le code source dans un zip avec les noms de binômes
+* si plusieurs versions (si touttes les fonctionnalités ne marchent pas dans toutes)
+
+Le mercredi 9 janvier : démonstration des codes, on raconte ce qu'on a fait
+avec un diapo (ce qu'on a fait/essayé de faire, retour sur Lotka-Voltera)
+10 minutes+5 minutes de questions
+
 
 ## Lancer le programme
 Pour éviter que ça consomme 1Go de RAM, il faut le lancer avec `java -Xmx100M Affichage`. Ça marche même avec 25M de RAM, par contre on ne peut pas zoomer beaucoup.

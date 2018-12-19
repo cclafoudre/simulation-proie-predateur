@@ -30,7 +30,7 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
         this.taille = tableauVivants.length;
         simulTimer = new Timer(1, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                run();
+                run();run();run();run();
             }
         });
         perfTimer.start();
@@ -64,6 +64,12 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
         Vivant initial = getRandomVivant();
         mangerBouger(initial); //action principale
         reproduction(initial);
+        for (int y = 0; y < simulation.length; y++) {
+            for (int x = 0; x < simulation[y].length; x++) {
+                if(simulation[y][x]!=null)
+                    simulation[y][x].vivre();
+            }
+        }
         perfCompteur +=1;
     }
 
