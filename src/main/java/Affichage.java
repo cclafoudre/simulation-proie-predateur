@@ -215,6 +215,7 @@ public class Affichage extends JFrame implements ActionListener {
         updateGraph.start();
         grille.autoFit();
         //JOptionPane.showMessageDialog(null,new JLabel("Veuillez lancer la simulation depuis le menu Simulation > Lancer"),"Task failed successfully !",JOptionPane.INFORMATION_MESSAGE);
+	Reglages.fenetre(new Reglages());
     }
 
     public static void main(String[] args) throws URISyntaxException, IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
