@@ -81,6 +81,6 @@ public class Vivant implements ActionListener {
     }
 
     public boolean peutSeReproduire(){
-        return true;
+        return false;
     }
 }
