@@ -7,11 +7,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 
 /**
  * Classe pour lancer le programme. Il y a dedans tous les contr&ocirc;les, et c'est elle qui poss&egrave;de et g&egrave;re les objets
@@ -215,21 +210,10 @@ public class Affichage extends JFrame implements ActionListener {
         updateGraph.start();
         grille.autoFit();
         //JOptionPane.showMessageDialog(null,new JLabel("Veuillez lancer la simulation depuis le menu Simulation > Lancer"),"Task failed successfully !",JOptionPane.INFORMATION_MESSAGE);
+	    Reglages.fenetre(new Reglages());
     }
 
-    public static void main(String[] args) throws URISyntaxException, IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
-        URI nomJar = Affichage.class.getProtectionDomain().getCodeSource().getLocation().toURI();
-        if (args.length == 0 && nomJar.toString().endsWith("jar")) {
-                // re-launch the app itselft with VM option passed
-            System.out.println(nomJar.getPath());
-            Runtime.getRuntime().exec(new String[] {"java", "-Xmx100m", "-jar", nomJar.getPath(), "45"}); //ça évite que le programme prenne 1Go de RAM ...
-            System.exit(0);
-        } //merci à internet pour l'astuce !
-        //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        //UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-
-        /*MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name = null;*/
+    public static void main(String[] args) {
         Affichage mbean;
         for (int i = 0; i < args.length; i++) {
             System.out.print(args[i]+" ");

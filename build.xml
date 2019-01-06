@@ -62,4 +62,10 @@
 
     <target name="all" description="Compilation et exécution" depends="clean,setup,compile,package,run" />
 
+    <target name="dev" depends="compile">
+	<java classname="Reglages" fork="true">
+	    <classpath refid="projet.classpath"/>
+	</java>
+    </target>
+
 </project>
