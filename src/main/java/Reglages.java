@@ -10,6 +10,7 @@ public class Reglages extends JPanel {
     private ChampReglage chanceReprodPotiron;
     private ChampReglage pvLapin;
     private ChampReglage pvPotiron;
+    private JCheckBox repoductionACote = new JCheckBox("Naissance à coté du Vivant");
     private JButton save = new JButton("Sauvegarder les parametres");
     private JButton restore = new JButton("Restaurer les parametres");
 
@@ -47,6 +48,12 @@ public class Reglages extends JPanel {
                 pvPotiron.valField.setText(""+Potiron.PV_INITIAL);
             }
         });
+        repoductionACote.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Plateau.REPRODUCTION_A_COTE=repoductionACote.isSelected();
+            }
+        });
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -67,6 +74,7 @@ public class Reglages extends JPanel {
                 pvLapin.valSlider.setValue(Lapin.PV_INITIAL);
                 pvPotiron.valField.setText(""+Potiron.PV_INITIAL);
                 pvPotiron.valSlider.setValue(Potiron.PV_INITIAL);
+                repoductionACote.setSelected(Plateau.REPRODUCTION_A_COTE);
             }
         });
 
@@ -74,6 +82,7 @@ public class Reglages extends JPanel {
         add(vivantEsperanceVie);
         add(pvLapin);
         add(pvPotiron);
+        add(repoductionACote);
         add(save);
         add(restore);
     }
@@ -98,12 +107,14 @@ class Parametres implements Serializable {
     int vivantEsperanceVie;
     int chanceReprodPotiron;
     int pvLapin;
+    boolean reprodACote;
 
     public Parametres saveValeurs(){
         vivantEsperanceVie = Vivant.DELAI_TIMER;
         pvPotiron = Potiron.PV_INITIAL;
         pvLapin = Lapin.PV_INITIAL;
         chanceReprodPotiron = Potiron.CHANCE_REPRODUCTION;
+        reprodACote=Plateau.REPRODUCTION_A_COTE;
         return this;
     }
     public Parametres restoreValeurs() {
@@ -111,6 +122,7 @@ class Parametres implements Serializable {
         Potiron.PV_INITIAL = pvPotiron;
         Lapin.PV_INITIAL = pvLapin;
         Potiron.CHANCE_REPRODUCTION=chanceReprodPotiron;
+        Plateau.REPRODUCTION_A_COTE=reprodACote;
         return this;
     }
     public static void serializer() {

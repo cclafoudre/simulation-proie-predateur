@@ -10,6 +10,7 @@ import java.util.Random;
  */
 public class Plateau extends Thread implements ActionListener, Grille.EditListener {
     public static boolean SIMULATION_ACTIVE;
+    public static boolean REPRODUCTION_A_COTE=false;
     public Vivant[][] simulation;
     public static int tailleCase = 15;
     private int taille;
@@ -68,11 +69,43 @@ public class Plateau extends Thread implements ActionListener, Grille.EditListen
     }
 
     private void reproduction(Vivant vivant){
-        if(vivant.peutSeReproduire()){
-            if(vivant instanceof Lapin)
-                ajouterVivant(new Lapin(), getRandomVide());
-            if(vivant instanceof Potiron)
-                ajouterVivant(new Potiron(),getRandomVide());
+        if(!REPRODUCTION_A_COTE) {
+            if (vivant.peutSeReproduire()) {
+                if (vivant instanceof Lapin)
+                    ajouterVivant(new Lapin(), getRandomVide());
+                if (vivant instanceof Potiron)
+                    ajouterVivant(new Potiron(),getRandomVide());
+            }
+        } else {
+            if (vivant.peutSeReproduire()) {
+                reproductionL:
+                if (vivant instanceof Lapin) {
+                    for (int y = vivant.y - 1; y < vivant.y + 1; y++) {
+                        for (int x = vivant.x - 1; x < vivant.x + 1; x++) {
+                            Pos naissancePos = new Pos(x, y);
+                            if (naissancePos.positionValide(taille))
+                                if (estVide(naissancePos)) {
+                                    ajouterVivant(new Lapin(), naissancePos);
+                                    break reproductionL;
+                                }
+                        }
+                    }
+                }
+                reproductionP:
+                if (vivant instanceof Potiron) {
+                    for (int y = vivant.y - 1; y < vivant.y + 1; y++) {
+                        for (int x = vivant.x - 1; x < vivant.x + 1; x++) {
+                            Pos naissancePos = new Pos(x, y);
+                            if (naissancePos.positionValide(taille))
+                                if (estVide(naissancePos)) {
+                                    ajouterVivant(new Potiron(), naissancePos);
+                                    break reproductionP;
+                                }
+                        }
+                    }
+                }
+
+            }
         }
     }
 
