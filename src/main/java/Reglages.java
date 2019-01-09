@@ -90,7 +90,7 @@ public class Reglages extends JPanel {
     public static JFrame fenetre(Reglages reglages) {
         JFrame f = new JFrame("Réglages");
         f.add(reglages);
-//	f.setLocationRelativeTo(null);
+    	f.setLocationRelativeTo(null);
         f.setSize(500, 500);
         f.setVisible(true);
         f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);

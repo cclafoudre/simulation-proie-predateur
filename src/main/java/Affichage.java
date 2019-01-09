@@ -23,6 +23,7 @@ public class Affichage extends JFrame implements ActionListener {
     private Graphique lapinsPotironsG2;
     private JFrame gf1;
     private JFrame gf2;
+    private JFrame reglagesFrame;
 
     Timer updateGraph = new Timer(100, this);
 
@@ -48,6 +49,7 @@ public class Affichage extends JFrame implements ActionListener {
     private JSlider slideFPS = new JSlider(1,60,30);
     private JMenuItem autofit = new JMenuItem("Ajuster la taille automatiquement");
     private JMenuItem resetDisposition = new JMenuItem("Réinitialiser la disposition");
+    private JMenuItem afficherReglages = new JMenuItem("Paramètres de simulation");
 
     private JMenu simulMenu = new JMenu("Simulation");
     private JMenuItem boutonAction = new JMenuItem("Simuler un tour");
@@ -94,6 +96,7 @@ public class Affichage extends JFrame implements ActionListener {
         lapPotFenetre.addActionListener(this);
         cleanLapFpot.addActionListener(this);
         cleanLapPot.addActionListener(this);
+        afficherReglages.addActionListener(this);
 
         startStopSimul.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
         boutonAction.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
@@ -149,7 +152,8 @@ public class Affichage extends JFrame implements ActionListener {
         simulMenu.add(a1);
         simulMenu.add(slideVitesse);
         simulMenu.add(new JSeparator());
-        simulMenu.add(vivantsTimer);
+        //simulMenu.add(vivantsTimer);
+        simulMenu.add(afficherReglages);
 
         actions.add(plusDeVivants);
         actions.add(moinsDeVivants);
@@ -199,7 +203,7 @@ public class Affichage extends JFrame implements ActionListener {
         }).start();
         updateGraph.start();
         grille.autoFit();
-	    Reglages.fenetre(new Reglages());
+	    reglagesFrame=Reglages.fenetre(new Reglages());
     }
 
     public static void main(String[] args) {
@@ -312,6 +316,10 @@ public class Affichage extends JFrame implements ActionListener {
         }
         if(e.getSource().equals(cleanLapFpot)){
             lapinsPotironsG2.vider();
+        }
+        if(e.getSource().equals(afficherReglages)){
+            if(!reglagesFrame.isVisible())
+                reglagesFrame.setVisible(true);
         }
     }
     public void setSize(int largeur, int hauteur){
