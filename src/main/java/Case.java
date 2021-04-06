@@ -8,24 +8,21 @@ public class Case extends JPanel {
     public Case aGauche;
     public int x;
     public int y;
-    public Vivant monVivant;
+    public Espece monEspece;
     public static Color COULEUR_VIDE = new Color(46, 255, 1);
-    public static Color COULEUR_POTIRON =  new Color(255, 81,0);
-
     public JLabel texte = new JLabel(" ");
-
-    public int pointsDeVie;
+    public int Energie;
 
     public Case() {
         super();
-        pointsDeVie=0; //par défaut il est mort, c'est une case vide
+        Energie=0; //par défaut il est mort et c'est une case vide
         setBackground(COULEUR_VIDE);
         add(texte);
     }
 
-    public void setVivant(Vivant monVivant) {
-        this.monVivant = monVivant;
-        setBackground(monVivant.getCouleur());
+    public void setEspece(Espece monEspece) {
+        this.monEspece = monEspece;
+        setBackground(monEspece.getCouleur());
 
     }
 }
